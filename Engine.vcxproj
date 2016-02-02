@@ -1,0 +1,293 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug Inline|Win32">
+      <Configuration>Debug Inline</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{220117B3-FF15-4975-BF35-7CF07AF06529}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Engine</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Inline|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '12.0'">v120</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '14.0'">v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Inline|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IntDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IntDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Inline|Win32'">
+    <OutDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Inline|Win32'">
+    <IntDir>$(SolutionDir)..\Temporary\$(ProjectName)_$(PlatformName)_$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINSOCKAPI_;WIN32_LEAN_AND_MEAN;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)../</AdditionalIncludeDirectories>
+      <EnablePREfast>false</EnablePREfast>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BrowseInformation>true</BrowseInformation>
+      <CallingConvention>VectorCall</CallingConvention>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+    </Lib>
+    <Lib>
+      <AdditionalLibraryDirectories>D:\Guildhall\P4\Walker_Christian\C23\Students\walkerc\Projects\Engine\Libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Inline|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_WINSOCKAPI_;WIN32_LEAN_AND_MEAN;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>$(ProjectDir)../</AdditionalIncludeDirectories>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Guildhall\P4\Walker_Christian\C23\Students\walkerc\Projects\Engine\Libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_WINSOCKAPI_;WIN32_LEAN_AND_MEAN;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)../</AdditionalIncludeDirectories>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <OmitFramePointers>true</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <CallingConvention>VectorCall</CallingConvention>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
+      <AdditionalLibraryDirectories>D:\Guildhall\P4\Walker_Christian\C23\Students\walkerc\Projects\Engine\Libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Assert.cpp" />
+    <ClCompile Include="CalculateOrderJob.cpp" />
+    <ClCompile Include="Clock.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="NetConnection.cpp" />
+    <ClCompile Include="GenerateFilesJob.cpp" />
+    <ClCompile Include="Graphics\Camera3D.cpp" />
+    <ClCompile Include="Graphics\FrameBuffer.cpp" />
+    <ClCompile Include="Graphics\Material.cpp" />
+    <ClCompile Include="Graphics\Renderer.cpp" />
+    <ClCompile Include="Graphics\Shader.cpp" />
+    <ClCompile Include="Graphics\ShaderProgram.cpp" />
+    <ClCompile Include="Graphics\Texture.cpp" />
+    <ClCompile Include="HashBufferJob.cpp" />
+    <ClCompile Include="JobManager.cpp" />
+    <ClCompile Include="Libraries\stb_image.c" />
+    <ClCompile Include="Libraries\tinystr.cpp" />
+    <ClCompile Include="Libraries\tinyxml.cpp" />
+    <ClCompile Include="Libraries\tinyxmlerror.cpp" />
+    <ClCompile Include="Libraries\tinyxmlparser.cpp" />
+    <ClCompile Include="Libraries\xmlParser.cpp" />
+    <ClCompile Include="LoadFileJob.cpp" />
+    <ClCompile Include="Math\EulerAngles.cpp" />
+    <ClCompile Include="Math\Matrices.cpp" />
+    <ClCompile Include="MeshUtilities.cpp" />
+    <ClCompile Include="NetAddress.cpp" />
+    <ClCompile Include="NetMessage.cpp" />
+    <ClCompile Include="NetPacket.cpp" />
+    <ClCompile Include="NetSession.cpp" />
+    <ClCompile Include="NetSystem.cpp" />
+    <ClCompile Include="PacketQueue.cpp" />
+    <ClCompile Include="ProfileSection.cpp" />
+    <ClCompile Include="ReverseBufferJob.cpp" />
+    <ClCompile Include="SaveFileJob.cpp" />
+    <ClCompile Include="SignpostAllocator.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="SocketThread.cpp" />
+    <ClCompile Include="TestMemory.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="TriangleMesh.cpp" />
+    <ClCompile Include="UDPSocket.cpp" />
+    <ClCompile Include="Utilities\BinaryBufferBuilder.cpp" />
+    <ClCompile Include="Utilities\BinaryBufferParser.cpp" />
+    <ClCompile Include="Utilities\BinaryFileParser.cpp" />
+    <ClCompile Include="Utilities\DevConsole.cpp" />
+    <ClCompile Include="Utilities\EngineCommon.cpp" />
+    <ClCompile Include="Utilities\StringTable.cpp" />
+    <ClCompile Include="Utilities\Time.cpp" />
+    <ClCompile Include="Utilities\Win32Wrapper.cpp" />
+    <ClCompile Include="Utilities\XMLFontRenderer.cpp" />
+    <ClCompile Include="XMLUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Assert.hpp" />
+    <ClInclude Include="CalculateOrderJob.hpp" />
+    <ClInclude Include="Clock.hpp" />
+    <ClInclude Include="Command.hpp" />
+    <ClInclude Include="NetConnection.hpp" />
+    <ClInclude Include="GenerateFilesJob.hpp" />
+    <ClInclude Include="Graphics\Camera3D.hpp" />
+    <ClInclude Include="Graphics\FrameBuffer.hpp" />
+    <ClInclude Include="Graphics\Material.hpp" />
+    <ClInclude Include="Graphics\Renderer.hpp" />
+    <ClInclude Include="Graphics\Shader.hpp" />
+    <ClInclude Include="Graphics\ShaderProgram.hpp" />
+    <ClInclude Include="Graphics\Texture.hpp" />
+    <ClInclude Include="HashBufferJob.hpp" />
+    <ClInclude Include="JobManager.hpp" />
+    <ClInclude Include="Libraries\tinystr.h" />
+    <ClInclude Include="Libraries\tinyxml.h" />
+    <ClInclude Include="Libraries\xmlParser.h" />
+    <ClInclude Include="LimitSingleInstance.hpp" />
+    <ClInclude Include="LoadFileJob.hpp" />
+    <ClInclude Include="Math\EulerAngles.hpp" />
+    <ClInclude Include="Math\Matrices.h" />
+    <ClInclude Include="Math\raw_vector.hpp" />
+    <ClInclude Include="Math\raw_vector_impl.hpp" />
+    <ClInclude Include="Math\Vertex.hpp" />
+    <ClInclude Include="Math\Vertex3D_PCT.hpp" />
+    <ClInclude Include="Memory.hpp" />
+    <ClInclude Include="MeshUtilities.hpp" />
+    <ClInclude Include="NetAddress.hpp" />
+    <ClInclude Include="NetMessage.hpp" />
+    <ClInclude Include="NetPacket.hpp" />
+    <ClInclude Include="NetSession.hpp" />
+    <ClInclude Include="NetSystem.hpp" />
+    <ClInclude Include="PacketQueue.hpp" />
+    <ClInclude Include="ProfileSection.hpp" />
+    <ClInclude Include="ReverseBufferJob.hpp" />
+    <ClInclude Include="SaveFileJob.hpp" />
+    <ClInclude Include="SignpostAllocator.hpp" />
+    <ClInclude Include="SocketThread.hpp" />
+    <ClInclude Include="TestMemory.hpp" />
+    <ClInclude Include="Thread.hpp" />
+    <ClInclude Include="TriangleMesh.hpp" />
+    <ClInclude Include="UDPSocket.hpp" />
+    <ClInclude Include="Utilities\BinaryBufferBuilder.hpp" />
+    <ClInclude Include="Utilities\BinaryBufferParser.hpp" />
+    <ClInclude Include="Utilities\BinaryFileParser.hpp" />
+    <ClInclude Include="Utilities\DevConsole.hpp" />
+    <ClInclude Include="Utilities\EngineCommon.hpp" />
+    <ClInclude Include="Utilities\Lock.hpp" />
+    <ClInclude Include="Utilities\StringTable.hpp" />
+    <ClInclude Include="Utilities\ThreadSafeQueue.hpp" />
+    <ClInclude Include="Utilities\Time.hpp" />
+    <ClInclude Include="Utilities\Win32Wrapper.hpp" />
+    <ClInclude Include="Utilities\XMLFontRenderer.hpp" />
+    <ClInclude Include="XMLUtils.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
