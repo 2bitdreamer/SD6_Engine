@@ -11,9 +11,14 @@
 #include "Engine/Utilities/EngineCommon.hpp"
 #include "Engine/Utilities/XMLFontRenderer.hpp"
 #include "../Graphics/Renderer.hpp"
+#include "../Assert.hpp"
+#include "../NetAddress.hpp"
+#include "../NetSession.hpp"
+#include "../NetMessage.hpp"
 
 static std::deque<ConsoleLine> g_consoleLines;
 static std::map<std::string, ConsoleFunction*> g_messageDefinitions;
+static NetSession* g_netSession = nullptr;
 
 
 const float g_lineSpaceMult = 1.f;
@@ -118,6 +123,60 @@ void CommandQuit(const ConsoleCommandArgs&) {
 	exit(1);
 }
 
+void CommandCreateSession(const ConsoleCommandArgs& args) {
+	short port = atoi(args.m_argsList[0].c_str());
+
+	g_netSession->Host(port);
+	//g_netSession->Listen(true);
+}
+
+void NetPacketSendTo(NetSession* g_netSession, NetPacket* packet)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+
+size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable)
+{
+	char portname[16];
+	addrinfo* addresses = AllocAddressesForHost(hostname.c_str(), portname, AF_INET, SOCK_DGRAM, bindable);
+	
+	size_t c = 0;
+	addrinfo* addr = addresses;
+
+	while ((c < outbuf_len) && (addr != nullptr)) {
+
+		if (addr->ai_family == AF_INET) {
+			NetAddress na;
+			NetAddrFromSockAddr(&na, addr->ai_addr);
+			outbuf[c] = na;
+			++c;
+		}
+
+		addr = addr->ai_next;
+	}
+
+	FreeAddresses(addresses);
+	return c;
+}
+
+void CommandPing(const ConsoleCommandArgs& args) {
+	FATAL_ASSERT(args.m_argsList.size() == 2);
+
+	unsigned int port = atoi(args.m_argsList[1].c_str());
+	std::string ip = args.m_argsList[0];
+
+	//construct packet, put the net message in it, push back to outgoing queue
+	NetAddress toAddr;
+	size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
+	NetPacket* packet = new NetPacket(args.m_argsList[2], args.m_argsList[2].size(), &toAddr);
+	NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+	packet->AddMessage(msg);
+
+	NetPacketSendTo(g_netSession, packet);
+	//?
+}
+
 
 
 DevConsole::DevConsole(void)
@@ -132,6 +191,9 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("clear"), CommandClear);
 	RegisterFunction(std::string("help"), CommandHelp);
 	RegisterFunction(std::string("quit"), CommandQuit);
+	RegisterFunction(std::string("ping"), CommandPing);
+
+	g_netSession = new NetSession();
 
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);

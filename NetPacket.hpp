@@ -2,6 +2,7 @@
 #include "Assert.hpp"
 #include "NetAddress.hpp"
 #include "Utilities\EngineCommon.hpp"
+class NetMessage;
 
 class ByteBuffer;
 size_t const PACKET_MTU = 1400; // Maximum Packet Size
@@ -24,7 +25,7 @@ public:
 	// @return 
 	//    true:  Was enough room and was written
 	//    false: Not enough room, and was not written.
-	bool WriteBytes(void *data, size_t size);
+	bool WriteBytes(const void *data, size_t size);
 
 	// Reads from buffer, copying data up to size into data
 	// @return 
@@ -37,16 +38,10 @@ public:
 	void SetLength(size_t len);
 
 	template<typename T>
-	bool Write(T const &v)
-	{
-		WriteBytes(&v, sizeof(Tx));
-	}
+	bool Write(T const &v);
 
 	template<typename T>
-	bool Read(T const &v)
-	{
-		return (ReadBytes(&v, sizeof(T)) == sizeof(T));
-	}
+	bool Read(T const &v);
 };
 
 class NetPacket : public ByteBuffer
@@ -55,11 +50,14 @@ public:
 	uint32_t m_buffer[PACKET_MTU];
 	NetAddress address; // to or from, depending on usage
 
+	bool AddMessage(const NetMessage& msg);
+
 	NetPacket();
-	NetPacket(void *data, size_t data_len, sockaddr* saddr, size_t saddrlen);
+	NetPacket(void *data, size_t data_len, sockaddr* saddr);
 	NetAddress const* GetAddress() const;
 	uint32_t* GetBuffer();
+	size_t BytesRemaining();
 
-
+	size_t m_msgCount;
 };
 

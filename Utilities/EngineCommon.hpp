@@ -23,11 +23,15 @@
 #include <time.h>
 #include "../Math/Vertex.hpp"
 
+#include <winsock2.h>
+struct addrinfo;
 #define nothrow void
+class NetAddress;
 
 
 
 extern Win32Wrapper myWinWrapper;
+
 extern bool g_isQuitting;
 #pragma warning(disable:4996)  //'_splitpath': This function or variable may be unsafe. Consider using _splitpath_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
 
@@ -80,6 +84,28 @@ struct TextLine {
 	std::string m_contents;
 	float m_textSize;
 };
+
+// TYPES ////////////////////////////////////////////////////////////////////
+typedef bool(*address_work_cb)(addrinfo*, void *user_arg);
+
+
+void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr);
+
+void* GetInAddr(sockaddr const *sa);
+
+// FUNCTION PROTOTYPES //////////////////////////////////////////////////////
+addrinfo* AllocAddressesForHost(char const *host,
+	char const *service,
+	int family,
+	int socktype,
+	bool binding);
+
+void FreeAddresses(addrinfo* addresses);
+
+uint16_t GetAddressPort(sockaddr const *addr);
+size_t GetAddressName(char *buffer, size_t const buffer_size, sockaddr const *sa);
+
+void ForEachAddress(addrinfo *addresses, address_work_cb cb, void *user_arg);
 
 struct RectA {
 	float xMin, yMin, width, height;

@@ -8,6 +8,8 @@
 #pragma comment(lib, "Ws2_32")
 #endif
 
+#include <stdio.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -17,6 +19,8 @@
 #include "Engine/Utilities/EngineCommon.hpp"
 #include "../Math/Vertex.hpp"
 #include <limits>
+#include "../NetAddress.hpp"
+#include <ws2tcpip.h>
 
 bool g_isQuitting = false;
 
@@ -49,6 +53,94 @@ void ReportAllocations()
 }
 */
 
+// get sockaddr, IPv4 or IPv6:
+static void* GetInAddr(sockaddr const *sa)
+{
+	return &(((sockaddr_in*)sa)->sin_addr);
+}
+
+//------------------------------------------------------------------------
+void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr)
+{
+	sockaddr_in *sa = (sockaddr_in*)addr;
+	memset(sa, 0, sizeof(sockaddr_in));
+	sa->sin_family = AF_INET;
+	memcpy(&sa->sin_addr, &net_addr.m_addr, sizeof(sa->sin_addr));
+	*addrlen = sizeof(sockaddr_in);
+	sa->sin_port = net_addr.m_port;
+
+}
+
+
+addrinfo* AllocAddressesForHost(char const *host,
+	char const *service,
+	int family,
+	int socktype,
+	bool binding)
+{
+	addrinfo hints;
+	addrinfo *addr;
+
+	if (nullptr == host) {
+		host = "localhost";
+	}
+
+	memset(&hints, 0, sizeof(hints));
+
+	// Which network layer it's using - usually want to UNSPEC, since it doesn't matter.  But since we're hard coding
+	// the client sides connection, we will likely want to use AF_INET when we want to bind an address
+	hints.ai_family = family;
+
+	hints.ai_socktype = socktype; // STREAM based, determines transport layer (TCP)
+	hints.ai_flags = binding ? AI_PASSIVE : 0; // used for binding/listening
+
+	int status = getaddrinfo(host, service, &hints, &addr);
+	if (status != 0) {
+		return nullptr;
+	}
+
+	return addr;
+}
+
+//-------------------------------------------------------------------------------------------------------
+void FreeAddresses(addrinfo *addresses)
+{
+	freeaddrinfo(addresses);
+}
+
+//-------------------------------------------------------------------------------------------------------
+uint16_t GetAddressPort(sockaddr const *sa)
+{
+	USHORT port = 0;
+	port = (((sockaddr_in*)sa)->sin_port);
+	return ntohs(port);
+}
+
+//-------------------------------------------------------------------------------------------------------
+size_t GetAddressName(char *buffer, size_t const buffer_size, sockaddr const *sa)
+{
+	char addr_name[INET6_ADDRSTRLEN];
+	memset(addr_name, 0, sizeof(addr_name));
+	inet_ntop(sa->sa_family, GetInAddr(sa), addr_name, INET6_ADDRSTRLEN);
+
+	uint16_t port = GetAddressPort(sa);
+
+	size_t len = min(buffer_size - 1, strlen(addr_name));
+	return sprintf_s(buffer, buffer_size, "%s:%i", addr_name, port);
+}
+
+//-------------------------------------------------------------------------------------------------------
+void ForEachAddress(addrinfo *addresses, address_work_cb cb, void *user_arg)
+{
+	addrinfo *iter = addresses;
+	while (nullptr != iter) {
+		if (cb(iter, user_arg)) {
+			break;
+		}
+
+		iter = iter->ai_next;
+	}
+}
 
 
 bool IsLittleEndian() {

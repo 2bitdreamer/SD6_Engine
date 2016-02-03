@@ -44,6 +44,7 @@ NetConnection* NetSession::AddConnection(const NetAddress& addr) {
 	NetConnection* connection = new NetConnection();
 	connection->m_netAddress = addr;
 	m_connections.push_back(connection);
+	return connection;
 }
 
 NetConnection* NetSession::FindConnection(const NetAddress& addr) {

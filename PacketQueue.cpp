@@ -3,7 +3,7 @@
 
 void NetPacketQueue::EnqueueOutgoing(uint32_t *buffer, size_t len, sockaddr* addr, size_t addr_len)
 {
-	NetPacket *packet = new NetPacket(buffer, len, addr, addr_len);
+	NetPacket *packet = new NetPacket(buffer, len, addr);
 	packet->SetLength(len);
 	EnqueueOutgoing(packet);
 }
@@ -25,7 +25,7 @@ NetPacket* NetPacketQueue::DequeueWrite()
 
 void NetPacketQueue::EnqueueIncoming(uint32_t* buffer, size_t len, sockaddr* addr, size_t addr_len)
 {
-	NetPacket *packet = new NetPacket(buffer, len, addr, addr_len);
+	NetPacket *packet = new NetPacket(buffer, len, addr);
 	packet->SetLength(len);
 	EnqueueIncoming(packet);
 }
