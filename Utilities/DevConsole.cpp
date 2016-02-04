@@ -164,11 +164,12 @@ void CommandPing(const ConsoleCommandArgs& args) {
 		NetAddress toAddr;
 		size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
 
-		sockaddr* addr;
-		size_t* addrsize;
-		SockAddrFromNetAddr(addr, addrsize, toAddr);
+		sockaddr addr;
+		size_t addrsize;
 
-		NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), addr);
+		SockAddrFromNetAddr(&addr, &addrsize, toAddr);
+
+		NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), &addr);
 		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
 		packet->AddMessage(msg);
 
@@ -191,6 +192,7 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("help"), CommandHelp);
 	RegisterFunction(std::string("quit"), CommandQuit);
 	RegisterFunction(std::string("ping"), CommandPing);
+	RegisterFunction(std::string("create_session"), CommandCreateSession);
 
 	g_netSession = new NetSession();
 

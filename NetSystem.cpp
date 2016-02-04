@@ -10,7 +10,7 @@ NetSystem::NetSystem()
 	NetMessage nm(nextMessageID);
 	NetMessageDefinition pingDef;
 	pingDef.m_callback = Ping;
-	pingDef.m_name = "Ping";
+	pingDef.m_name = "ping";
 	NetMessage::RegisterMessageDefinition(nextMessageID, pingDef);
 }
 
