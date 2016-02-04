@@ -21,6 +21,7 @@
 #include <limits>
 #include "../NetAddress.hpp"
 #include <ws2tcpip.h>
+#include "../Assert.hpp"
 
 bool g_isQuitting = false;
 
@@ -54,10 +55,27 @@ void ReportAllocations()
 */
 
 // get sockaddr, IPv4 or IPv6:
-static void* GetInAddr(sockaddr const *sa)
+ void* GetInAddr(sockaddr const *sa)
 {
 	return &(((sockaddr_in*)sa)->sin_addr);
 }
+
+ void* GetInAddr(sockaddr *sa, uint16_t *port, size_t *size_out)
+ {
+	 *size_out = sizeof(((sockaddr_in*)sa)->sin_addr);
+	 *port = ((sockaddr_in*)sa)->sin_port;
+	 return &(((sockaddr_in*)sa)->sin_addr);
+ }
+
+void NetAddrFromSockAddr(NetAddress *na, sockaddr *addr)
+{
+	memset(na, 0, sizeof(NetAddress));
+	size_t addrlen;
+	void *addr_ptr = GetInAddr(addr, &(na->m_port), &addrlen);
+	FATAL_ASSERT(addrlen <= sizeof(na->m_addr));
+	memcpy(&na->m_addr, addr_ptr, addrlen);
+}
+
 
 //------------------------------------------------------------------------
 void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr)
@@ -68,9 +86,7 @@ void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_
 	memcpy(&sa->sin_addr, &net_addr.m_addr, sizeof(sa->sin_addr));
 	*addrlen = sizeof(sockaddr_in);
 	sa->sin_port = net_addr.m_port;
-
 }
-
 
 addrinfo* AllocAddressesForHost(char const *host,
 	char const *service,

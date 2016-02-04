@@ -130,12 +130,6 @@ void CommandCreateSession(const ConsoleCommandArgs& args) {
 	//g_netSession->Listen(true);
 }
 
-void NetPacketSendTo(NetSession* g_netSession, NetPacket* packet)
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
-
-
 size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable)
 {
 	char portname[16];
@@ -161,20 +155,26 @@ size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, cons
 }
 
 void CommandPing(const ConsoleCommandArgs& args) {
-	FATAL_ASSERT(args.m_argsList.size() == 2);
+		FATAL_ASSERT(args.m_argsList.size() == 2);
 
-	unsigned int port = atoi(args.m_argsList[1].c_str());
-	std::string ip = args.m_argsList[0];
+		unsigned int port = atoi(args.m_argsList[1].c_str());
+		std::string ip = args.m_argsList[0];
 
-	//construct packet, put the net message in it, push back to outgoing queue
-	NetAddress toAddr;
-	size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
-	NetPacket* packet = new NetPacket(args.m_argsList[2], args.m_argsList[2].size(), &toAddr);
-	NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
-	packet->AddMessage(msg);
+		//construct packet, put the net message in it, push back to outgoing queue
+		NetAddress toAddr;
+		size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
 
-	NetPacketSendTo(g_netSession, packet);
-	//?
+		sockaddr* addr;
+		size_t* addrsize;
+		SockAddrFromNetAddr(addr, addrsize, toAddr);
+
+		NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), addr);
+		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+		packet->AddMessage(msg);
+
+		NetPacketSendTo(g_netSession, packet);
+		g_netSession->SendPacket(packet);
+		//?
 }
 
 

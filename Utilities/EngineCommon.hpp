@@ -88,11 +88,12 @@ struct TextLine {
 // TYPES ////////////////////////////////////////////////////////////////////
 typedef bool(*address_work_cb)(addrinfo*, void *user_arg);
 
-
+void NetAddrFromSockAddr(NetAddress *na, sockaddr *addr);
 void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr);
 
 void* GetInAddr(sockaddr const *sa);
 
+void* GetInAddr(sockaddr *sa, uint16_t *port, size_t *size_out);
 // FUNCTION PROTOTYPES //////////////////////////////////////////////////////
 addrinfo* AllocAddressesForHost(char const *host,
 	char const *service,
