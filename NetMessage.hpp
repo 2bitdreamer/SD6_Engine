@@ -28,6 +28,7 @@ public:
 	static NetMessageDefinition* GetNetMessageDefinitionByName(const std::string& name);
 	static void RegisterMessageDefinition(uint8_t id, NetMessageDefinition def);
 	size_t GetRequiredSpaceInPacket() const;
+	void SetMessageData(void* data, size_t dataLen);
 public:
 	unsigned char m_buffer[NetMessage_MTU];
 	NetMessageDefinition* m_messageDefinition;

@@ -4,8 +4,29 @@
 #include "NetSession.hpp"
 #include "NetMessage.hpp"
 
+NetSystem* NetSystem::GetInstance()
+{
+	static NetSystem* ns = new NetSystem();
+	return ns;
+}
+
+bool NetSystem::Init()
+{
+	WSAData wsa_data;
+	int error = WSAStartup(MAKEWORD(2, 2), &wsa_data);
+	if (error == 0) {
+		return true;
+	}
+	else {
+		FATAL_ERROR("Could not setup WSA System");
+		return false;
+	}
+}
+
 NetSystem::NetSystem()
 {
+
+	Init();
 	uint8_t nextMessageID = NetMessage::GetNextID();
 	NetMessage nm(nextMessageID);
 	NetMessageDefinition pingDef;

@@ -33,12 +33,18 @@ NetMessageDefinition* NetMessage::GetNetMessageDefinitionByName(const std::strin
 
 void NetMessage::RegisterMessageDefinition(uint8_t id, NetMessageDefinition def)
 {
+	def.m_id = id;
 	g_messageDefinitions.insert(std::make_pair(id, def));
 }
 
 size_t NetMessage::GetRequiredSpaceInPacket() const
 {
-	return m_writeIndex + 3;
+	return m_numBytesWritten;
+}
+
+void NetMessage::SetMessageData(void* data, size_t dataLen) {
+	memcpy(m_buffer, data, dataLen);
+	m_numBytesWritten += dataLen;
 }
 
 NetMessage::~NetMessage()

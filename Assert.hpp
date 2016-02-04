@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-//#define ENABLEASSERTS
+#define ENABLEASSERTS
 
 #define FATAL_ERROR(errorText) FatalError(errorText, __FILE__, __FUNCTION__, __LINE__);
 #define RECOVERABLE_ERROR(errorText) RecoverableError(errorText, __FILE__, __FUNCTION__, __LINE__);

@@ -124,7 +124,7 @@ void CommandQuit(const ConsoleCommandArgs&) {
 }
 
 void CommandCreateSession(const ConsoleCommandArgs& args) {
-	short port = atoi(args.m_argsList[0].c_str());
+	short port = atoi(args.m_argsList[1].c_str());
 
 	g_netSession->Host(port);
 	//g_netSession->Listen(true);
@@ -132,8 +132,7 @@ void CommandCreateSession(const ConsoleCommandArgs& args) {
 
 size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable)
 {
-	char portname[16];
-	addrinfo* addresses = AllocAddressesForHost(hostname.c_str(), portname, AF_INET, SOCK_DGRAM, bindable);
+	addrinfo* addresses = AllocAddressesForHost(hostname.c_str(), std::to_string(port).c_str(), AF_INET, SOCK_DGRAM, bindable);
 	
 	size_t c = 0;
 	addrinfo* addr = addresses;
@@ -155,24 +154,23 @@ size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, cons
 }
 
 void CommandPing(const ConsoleCommandArgs& args) {
-		FATAL_ASSERT(args.m_argsList.size() == 2);
+		FATAL_ASSERT(args.m_argsList.size() == 4);
 
-		unsigned int port = atoi(args.m_argsList[1].c_str());
-		std::string ip = args.m_argsList[0];
+		unsigned short port = atoi(args.m_argsList[2].c_str());
+		std::string ip = args.m_argsList[1];
 
 		//construct packet, put the net message in it, push back to outgoing queue
 		NetAddress toAddr;
-		size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
+		memcpy(toAddr.m_addr, ip.data(), ip.size());
+		toAddr.m_port = port;
+		//size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
 
-		sockaddr addr;
-		size_t addrsize;
-
-		SockAddrFromNetAddr(&addr, &addrsize, toAddr);
-
-		NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), &addr);
+		//NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), &addr);
+		NetPacket* packet = new NetPacket();
+		packet->m_address = toAddr;
 		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+		msg.SetMessageData((void*)args.m_argsList[3].c_str(), args.m_argsList[3].size());
 		packet->AddMessage(msg);
-
 		g_netSession->SendPacket(packet);
 		//?
 }
@@ -192,9 +190,9 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("help"), CommandHelp);
 	RegisterFunction(std::string("quit"), CommandQuit);
 	RegisterFunction(std::string("ping"), CommandPing);
-	RegisterFunction(std::string("create_session"), CommandCreateSession);
+	RegisterFunction(std::string("createsession"), CommandCreateSession);
 
-	g_netSession = new NetSession();
+	g_netSession = NetSystem::GetInstance()->CreateSession();
 
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);

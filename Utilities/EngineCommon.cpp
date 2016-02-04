@@ -80,7 +80,7 @@ void NetAddrFromSockAddr(NetAddress *na, sockaddr *addr)
 //------------------------------------------------------------------------
 void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr)
 {
-	sockaddr_in *sa = (sockaddr_in*)addr;
+	sockaddr_in* sa = (sockaddr_in*)addr;
 	memset(sa, 0, sizeof(sockaddr_in));
 	sa->sin_family = AF_INET;
 	memcpy(&sa->sin_addr, &net_addr.m_addr, sizeof(sa->sin_addr));

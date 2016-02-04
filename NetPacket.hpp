@@ -13,11 +13,11 @@ size_t const PACKET_MTU = 1400; // Maximum Packet Size
 class ByteBuffer
 {
 public:
-	uint32_t* m_buffer;
+	unsigned char m_buffer[PACKET_MTU];
 	size_t m_maxSize;
 
-	size_t m_writeIndex;
-	size_t m_readIndex;
+	size_t m_numBytesWritten;
+	size_t m_numBytesRead;
 
 	void Init(void* buffer, size_t max_size);
 
@@ -34,28 +34,34 @@ public:
 	//    Advanced read index either way.
 	size_t ReadBytes(void *out_data, size_t size);
 	size_t GetLength() const;
-	uint32_t* GetBuffer();
+	unsigned char* GetBuffer();
 	void SetLength(size_t len);
 
 	template<typename T>
-	bool Write(T const &v);
+	bool Write(const T& v)
+	{
+		return WriteBytes(&v, sizeof(T));
+	}
 
 	template<typename T>
-	bool Read(T const &v);
+	bool Read(const T& v)
+	{
+		return (ReadBytes(&v, sizeof(T)) == sizeof(T));
+	}
 };
 
 class NetPacket : public ByteBuffer
 {
 public:
-	uint32_t m_buffer[PACKET_MTU];
-	NetAddress address; // to or from, depending on usage
+	NetAddress m_address; // to or from, depending on usage
 
 	bool AddMessage(const NetMessage& msg);
 
+	void UpdateHeader();
 	NetPacket();
 	NetPacket(void *data, size_t data_len, sockaddr* saddr);
 	NetAddress const* GetAddress() const;
-	uint32_t* GetBuffer();
+	unsigned char* GetBuffer();
 	size_t BytesRemaining();
 
 	size_t m_msgCount;

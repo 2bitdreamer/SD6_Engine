@@ -10,12 +10,7 @@ class NetSystem
 {
 
 public:
-	static NetSystem* GetInstance()
-	{
-		static NetSystem* ns = new NetSystem();
-		return ns;
-	}
-
+	static NetSystem* GetInstance();
 
 	bool Init(); // WSAStartup
 	void Deinit(); // WSACleanup

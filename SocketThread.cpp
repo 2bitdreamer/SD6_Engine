@@ -36,7 +36,7 @@ void SocketThread::CreateAndBindSocket()
 
 void SocketThread::ProcessIncoming()
 {
-	uint32_t buffer[PACKET_MTU];
+	unsigned char buffer[PACKET_MTU];
 	sockaddr_storage their_addr;
 	while (m_owner->IsRunning()) {
 		size_t addrlen = sizeof(their_addr);
@@ -71,13 +71,19 @@ void SocketThread::ProcessOutgoing()
 {
 	NetPacket *packet = m_packetQueue->DequeueWrite();
 	while (nullptr != packet) {
-		const NetAddress* address = packet->GetAddress();
-		sendto(m_thisSocket,
+
+		sockaddr sockaddr;
+		size_t addrlen;
+		SockAddrFromNetAddr(&sockaddr, &addrlen, packet->m_address);
+
+		int sent = sendto(m_thisSocket,
 			(char*)packet->GetBuffer(),
 			packet->GetLength(),
 			0,
-			(sockaddr*)&address->m_addr,
-			sizeof(sockaddr_in));
+			&sockaddr,
+			addrlen);
+
+		FATAL_ASSERT(sent != SOCKET_ERROR);
 
 		delete packet;
 		packet = m_packetQueue->DequeueWrite();

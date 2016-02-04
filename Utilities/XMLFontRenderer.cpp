@@ -68,7 +68,7 @@ float XMLFontRenderer::CalcTextWidth(const std::string& text, float height) {
 	float ratio = height/m_charset.LineHeight;
 	for( size_t i = 0; i < text.length(); ++i )
 	{
-		FontElement& currentFontElement = m_charset.Chars[text[i]];
+		FontElement& currentFontElement = m_charset.Chars[(unsigned char)text[i]];
 		cursor.x() += currentFontElement.xadvance;// + currentFontElement.xoffset + currentFontElement);
 	}
 
@@ -108,7 +108,7 @@ void XMLFontRenderer::DrawString(const std::string& Str, const RGBA& color, cons
 
 	for (size_t i = 0; i < Str.size(); ++i)
 	{
-		char currChar = Str[i];
+		unsigned char currChar = Str[i];
 
 		FontElement element = m_charset.Chars[currChar];
 

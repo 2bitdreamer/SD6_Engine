@@ -1,9 +1,12 @@
 #include "NetPacket.hpp"
 #include "NetMessage.hpp"
+#include <string>
 
 bool NetPacket::AddMessage(const NetMessage& msg)
 {
-	size_t msgLen = msg.GetRequiredSpaceInPacket();
+	UpdateHeader();
+
+	size_t msgLen = msg.GetLength();
 	if (msgLen > BytesRemaining()) {
 		return false;
 	}
@@ -11,9 +14,16 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 	Write<uint16_t>((uint16_t)msgLen);
 	Write<uint8_t>((uint8_t)(msg.m_messageDefinition->m_id));
 
-	WriteBytes((void*)msg.m_buffer, msg.GetLength());
+	WriteBytes(msg.m_buffer, msg.GetLength() + 3);
 	++m_msgCount;
 
+	return true;
+}
+
+void NetPacket::UpdateHeader() {
+	m_buffer[0] = '1';
+	m_buffer[1] = '1';
+	m_buffer[2] = m_msgCount;
 }
 
 NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
@@ -21,55 +31,63 @@ NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
 {
 	ByteBuffer::Init(m_buffer, PACKET_MTU);
 	WriteBytes(data, data_len);
-	address.Init(saddr);
+	m_address.Init(saddr);
+
+	UpdateHeader();
+	m_numBytesWritten += 3;
 }
 
 NetPacket::NetPacket() :
 	m_msgCount(0)
 {
 	ByteBuffer::Init(m_buffer, PACKET_MTU);
+	UpdateHeader();
+	m_numBytesWritten += 3;
 }
 
 const NetAddress* NetPacket::GetAddress() const
 {
-	return &address;
+	return &m_address;
 }
 
-uint32_t* NetPacket::GetBuffer()
+unsigned char* NetPacket::GetBuffer()
 {
 	return m_buffer;
 }
 
 size_t NetPacket::BytesRemaining()
 {
-	return (m_maxSize - (m_writeIndex + 3));
+	return m_maxSize - m_numBytesWritten;
 }
 
 void ByteBuffer::Init(void* buffer, size_t max_size)
 {
+	memset(buffer, 0, max_size);
 	m_maxSize = max_size;
-	m_buffer = (uint32_t*)buffer;
-	m_writeIndex = 0;
+	m_numBytesWritten = 0;
+	m_numBytesRead = 0;
 }
 
 bool ByteBuffer::WriteBytes(const void *data, size_t size)
 {
-	if ((m_maxSize + size) > PACKET_MTU)
+	if ((m_numBytesWritten + size) > m_maxSize)
 		return false;
 
-	memcpy(m_buffer + m_writeIndex, data, size);
-	m_writeIndex += size;
-	m_maxSize += size;
+	void* test = m_buffer + m_numBytesWritten;
+	memcpy(test, data, size);
 
+	m_numBytesWritten += size;
+
+	//std::string dataAsString = std::string((char*)m_buffer);
 	return true;
 }
 
 size_t ByteBuffer::GetLength() const
 {
-	return m_writeIndex;
+	return m_numBytesWritten;
 }
 
-uint32_t* ByteBuffer::GetBuffer()
+unsigned char* ByteBuffer::GetBuffer()
 {
 	return m_buffer;
 }
@@ -77,17 +95,6 @@ uint32_t* ByteBuffer::GetBuffer()
 void ByteBuffer::SetLength(size_t len)
 {
 	FATAL_ASSERT(len <= m_maxSize);
-	m_writeIndex = len;
+	m_numBytesWritten = len;
 }
 
-template<typename T>
-bool ByteBuffer::Write(const T& v)
-{
-	return WriteBytes(&v, sizeof(T));
-}
-
-template<typename T>
-bool ByteBuffer::Read(const T& v)
-{
-	return (ReadBytes(&v, sizeof(T)) == sizeof(T));
-}

@@ -6,12 +6,17 @@ struct sockaddr;
 class NetAddress
 {
 public:
-	uint32_t m_addr;;
-	uint16_t m_port;
+	unsigned char m_addr[16];
+	unsigned short m_port;
 
 	void Init(sockaddr* saddr);
 
+	NetAddress() :
+		m_port(0),
+		m_addr()
+	{
 
+	}
 };
 
 inline bool operator==(const NetAddress& lhs, const NetAddress& rhs) {
