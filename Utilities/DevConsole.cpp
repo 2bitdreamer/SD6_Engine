@@ -172,7 +172,6 @@ void CommandPing(const ConsoleCommandArgs& args) {
 		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
 		packet->AddMessage(msg);
 
-		NetPacketSendTo(g_netSession, packet);
 		g_netSession->SendPacket(packet);
 		//?
 }
