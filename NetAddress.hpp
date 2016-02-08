@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef _WINSOCKAPI_
+#undef _WINSOCKAPI_
+#endif
+
 #include <winsock2.h>
 #include "Utilities\EngineCommon.hpp"
 struct sockaddr;

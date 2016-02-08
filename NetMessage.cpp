@@ -6,12 +6,9 @@ static std::map<uint8_t, NetMessageDefinition> g_messageDefinitions;
 
 NetMessage::NetMessage(uint8_t id) {
 	m_messageDefinition = NetMessage::GetNetMessageDefinitionByID(id);
+	//FATAL_ASSERT(m_messageDefinition != nullptr);
 	Init(&m_buffer, NetMessage_MTU);
-}
-
-NetMessage::NetMessage(NetPacket& packet) 
-{
-
+	//WriteBytes((void*)id, sizeof(uint8_t));
 }
 
 NetMessageDefinition* NetMessage::GetNetMessageDefinitionByID(uint8_t id) {
@@ -19,6 +16,23 @@ NetMessageDefinition* NetMessage::GetNetMessageDefinitionByID(uint8_t id) {
 	if (result != g_messageDefinitions.end())
 		return &result->second;
 	return nullptr;
+}
+
+NetMessage::NetMessage(NetMessage* msgToCopy) {
+	Init(&m_buffer, NetMessage_MTU);
+	memcpy(&m_buffer, msgToCopy->GetBuffer(), msgToCopy->GetLength());
+	m_messageDefinition = msgToCopy->m_messageDefinition;
+	m_numBytesWritten = msgToCopy->m_numBytesWritten;
+}
+
+NetMessage::NetMessage(NetPacket& packet)
+{
+	//Will read the length and id off the packet, and assert the id is valid.  Will also set max readable bytes.
+}
+
+NetMessage::NetMessage()
+{
+	Init(&m_buffer, 0);
 }
 
 NetMessageDefinition* NetMessage::GetNetMessageDefinitionByName(const std::string& name) {

@@ -21,6 +21,9 @@ class NetMessage : public ByteBuffer
 public:
 	NetMessage(uint8_t id);
 	NetMessage(NetPacket& packet);
+	NetMessage();
+
+	NetMessage(NetMessage* msgToCopy);
 	~NetMessage();
 
 	static uint8_t GetNextID();

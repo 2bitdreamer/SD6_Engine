@@ -1,6 +1,7 @@
 #include "NetSession.hpp"
 #include "NetAddress.hpp"
 #include "NetConnection.hpp"
+#include "NetMessage.hpp"
 
 void NetSession::Shutdown()
 {
@@ -38,6 +39,21 @@ void NetSession::SendPacket(NetPacket* packet) {
 
 void NetSession::ReceivePacket(NetPacket* packet) {
 	m_packetQueue.EnqueueIncoming(packet);
+}
+
+void NetSession::SendMessage(NetMessage* msg) {
+	for (auto it = m_connections.begin(); it != m_connections.end(); ++it) {
+		NetConnection* nc = *it;
+		NetMessage* nmCopy = new NetMessage(msg);
+		nc->m_outgoingMessages.enqueue(nmCopy);
+	}
+
+	delete msg;
+}
+
+
+void NetSession::Tick() {
+	//Ticks all connections if time
 }
 
 NetConnection* NetSession::AddConnection(const NetAddress& addr) {

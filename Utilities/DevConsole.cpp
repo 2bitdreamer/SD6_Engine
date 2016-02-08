@@ -123,10 +123,22 @@ void CommandQuit(const ConsoleCommandArgs&) {
 	exit(1);
 }
 
+void CommandAddConnection(const ConsoleCommandArgs& ca) {
+
+	std::string ip = ca.m_argsList[1];
+	short port = (short)atoi(ca.m_argsList[2].c_str());
+
+	NetAddress netAddr;
+	memcpy(&netAddr.m_addr, ip.c_str(), ip.size());
+	netAddr.m_port = port;
+	g_netSession->AddConnection(netAddr);
+}
+
 void CommandCreateSession(const ConsoleCommandArgs& args) {
 	short port = atoi(args.m_argsList[1].c_str());
 
 	g_netSession->Host(port);
+	//ConsolePrintf("%i", RGBA(0, 255, 0, 255), "Session created on port", port);
 	//g_netSession->Listen(true);
 }
 
@@ -163,14 +175,20 @@ void CommandPing(const ConsoleCommandArgs& args) {
 		NetAddress toAddr;
 		memcpy(toAddr.m_addr, ip.data(), ip.size());
 		toAddr.m_port = port;
-		//size_t numAddr = NetAddressForHost(&toAddr, 1, AF_INET, ip, (uint16_t)port, false);
 
-		//NetPacket* packet = new NetPacket((void*)args.m_argsList[2].c_str(), args.m_argsList[2].size(), &addr);
 		NetPacket* packet = new NetPacket();
+		//packet->CreateHeader();
+
 		packet->m_address = toAddr;
 		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
-		msg.SetMessageData((void*)args.m_argsList[3].c_str(), args.m_argsList[3].size());
+
+		const char* stringData = args.m_argsList[3].c_str();
+		size_t dataLength = strlen(stringData);
+		msg.SetMessageData((void*)stringData, dataLength);
 		packet->AddMessage(msg);
+		
+		packet->UpdateNumMessages();
+
 		g_netSession->SendPacket(packet);
 		//?
 }
@@ -191,9 +209,9 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("quit"), CommandQuit);
 	RegisterFunction(std::string("ping"), CommandPing);
 	RegisterFunction(std::string("createsession"), CommandCreateSession);
+	RegisterFunction(std::string("add_connection"), CommandAddConnection);
 
 	g_netSession = NetSystem::GetInstance()->CreateSession();
-
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);
 	//std::vector<std::pair<RGBA, int>> hiColors;

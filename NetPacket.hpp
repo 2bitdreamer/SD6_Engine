@@ -25,7 +25,7 @@ public:
 	// @return 
 	//    true:  Was enough room and was written
 	//    false: Not enough room, and was not written.
-	bool WriteBytes(const void *data, size_t size);
+	bool WriteBytes(const void *data, size_t size, bool advanceBuffer=true);
 
 	// Reads from buffer, copying data up to size into data
 	// @return 
@@ -57,7 +57,9 @@ public:
 
 	bool AddMessage(const NetMessage& msg);
 
-	void UpdateHeader();
+	void CreateHeader();
+	void UpdateNumMessages();
+
 	NetPacket();
 	NetPacket(void *data, size_t data_len, sockaddr* saddr);
 	NetAddress const* GetAddress() const;

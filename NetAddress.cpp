@@ -1,6 +1,11 @@
 #include "NetAddress.hpp"
 #include <windows.h>
-#include <winsock.h>
+
+#ifdef _WINSOCKAPI_
+#undef _WINSOCKAPI_
+#endif
+
+#include <winsock2.h>
 #include "Assert.hpp"
 
 void NetAddress::Init(sockaddr* saddr)

@@ -15,24 +15,29 @@ bool NetSystem::Init()
 	WSAData wsa_data;
 	int error = WSAStartup(MAKEWORD(2, 2), &wsa_data);
 	if (error == 0) {
+
+		uint8_t nextMessageID = NetMessage::GetNextID();
+		NetMessage nm(nextMessageID);
+		NetMessageDefinition pingDef;
+		pingDef.m_callback = Ping;
+		pingDef.m_name = "ping";
+		NetMessage::RegisterMessageDefinition(nextMessageID, pingDef);
+
 		return true;
 	}
 	else {
 		FATAL_ERROR("Could not setup WSA System");
 		return false;
 	}
+
+
+	//Create netmessage definitions here
 }
 
 NetSystem::NetSystem()
 {
-
 	Init();
-	uint8_t nextMessageID = NetMessage::GetNextID();
-	NetMessage nm(nextMessageID);
-	NetMessageDefinition pingDef;
-	pingDef.m_callback = Ping;
-	pingDef.m_name = "ping";
-	NetMessage::RegisterMessageDefinition(nextMessageID, pingDef);
+
 }
 
 UDPSocket* NetSystem::CreateUDPSocket(NetPacketQueue *queue, short port)

@@ -23,6 +23,10 @@
 #include <time.h>
 #include "../Math/Vertex.hpp"
 
+#ifdef _WINSOCKAPI_
+#undef _WINSOCKAPI_
+#endif
+
 #include <winsock2.h>
 struct addrinfo;
 #define nothrow void

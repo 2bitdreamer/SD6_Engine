@@ -9,36 +9,36 @@ template <typename _Tx>
 class ThreadSafeQueue 
 {
 	private:
-		mutable CriticalSection cs;
-		std::queue<_Tx> queue;
+		mutable CriticalSection m_cs;
+		std::queue<_Tx> m_queue;
 
 	public:
 		void enqueue( _Tx &item ) 
 		{
-			cs.Enter();
-			queue.push( item );
-			cs.Exit();
+			m_cs.Enter();
+			m_queue.push( item );
+			m_cs.Exit();
 		}
 
 		bool dequeue( _Tx *out )
 		{
 			bool success = false;
-			cs.Enter();
-			if (queue.size() > 0) {
-				*out = queue.front();
-				queue.pop();
+			m_cs.Enter();
+			if (m_queue.size() > 0) {
+				*out = m_queue.front();
+				m_queue.pop();
 				success = true;
 			}
-			cs.Exit();
+			m_cs.Exit();
 			return success;
 		}
 
 		size_t size() const
 		{
 			size_t size = 0;
-			cs.Enter();
-			queue.size();
-			cs.Exit();
+			m_cs.Enter();
+			m_queue.size();
+			m_cs.Exit();
 
 			return size;
 		}

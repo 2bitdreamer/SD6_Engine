@@ -1,4 +1,9 @@
 #include "Thread.hpp"
+
+#ifdef _WINSOCKAPI_
+#undef _WINSOCKAPI_
+#endif
+
 #include <winsock2.h>
 // Declared in source file
 // Engine is only one that sees the socket thread

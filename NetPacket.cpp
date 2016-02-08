@@ -4,26 +4,31 @@
 
 bool NetPacket::AddMessage(const NetMessage& msg)
 {
-	UpdateHeader();
-
 	size_t msgLen = msg.GetLength();
 	if (msgLen > BytesRemaining()) {
 		return false;
 	}
 
-	Write<uint16_t>((uint16_t)msgLen);
+	Write<uint16_t>((uint16_t)msgLen + 3); 
 	Write<uint8_t>((uint8_t)(msg.m_messageDefinition->m_id));
 
-	WriteBytes(msg.m_buffer, msg.GetLength() + 3);
+	WriteBytes(msg.m_buffer, msg.GetLength());
 	++m_msgCount;
 
 	return true;
 }
 
-void NetPacket::UpdateHeader() {
-	m_buffer[0] = '1';
-	m_buffer[1] = '1';
-	m_buffer[2] = m_msgCount;
+void NetPacket::CreateHeader()
+{
+	unsigned short packetAckID = 0xffff;
+	WriteBytes(&packetAckID, sizeof(unsigned short));
+	UpdateNumMessages();
+	m_numBytesWritten++;
+}
+
+void NetPacket::UpdateNumMessages()
+{
+	m_buffer[2] = (uint8_t)m_msgCount;
 }
 
 NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
@@ -32,17 +37,13 @@ NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
 	ByteBuffer::Init(m_buffer, PACKET_MTU);
 	WriteBytes(data, data_len);
 	m_address.Init(saddr);
-
-	UpdateHeader();
-	m_numBytesWritten += 3;
 }
 
 NetPacket::NetPacket() :
 	m_msgCount(0)
 {
 	ByteBuffer::Init(m_buffer, PACKET_MTU);
-	UpdateHeader();
-	m_numBytesWritten += 3;
+	CreateHeader();
 }
 
 const NetAddress* NetPacket::GetAddress() const
@@ -68,7 +69,7 @@ void ByteBuffer::Init(void* buffer, size_t max_size)
 	m_numBytesRead = 0;
 }
 
-bool ByteBuffer::WriteBytes(const void *data, size_t size)
+bool ByteBuffer::WriteBytes(const void *data, size_t size, bool advanceBuffer/*=true*/)
 {
 	if ((m_numBytesWritten + size) > m_maxSize)
 		return false;
@@ -89,6 +90,7 @@ size_t ByteBuffer::GetLength() const
 
 unsigned char* ByteBuffer::GetBuffer()
 {
+	m_buffer[m_numBytesWritten] = '\0';
 	return m_buffer;
 }
 

@@ -32,6 +32,8 @@ public:
 
 	void SendPacket(NetPacket* packet);
 	void ReceivePacket(NetPacket* packet);
+	void SendMessage(NetMessage* msg);
+	void Tick();
 	NetConnection* AddConnection(const NetAddress& addr);
 	NetConnection* FindConnection(const NetAddress& addr);
 	const char* GetHostAddrName() const;

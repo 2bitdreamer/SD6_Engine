@@ -83,9 +83,9 @@ void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_
 	sockaddr_in* sa = (sockaddr_in*)addr;
 	memset(sa, 0, sizeof(sockaddr_in));
 	sa->sin_family = AF_INET;
-	memcpy(&sa->sin_addr, &net_addr.m_addr, sizeof(sa->sin_addr));
+	inet_pton(AF_INET, (PCSTR)net_addr.m_addr, &sa->sin_addr);
 	*addrlen = sizeof(sockaddr_in);
-	sa->sin_port = net_addr.m_port;
+	sa->sin_port = htons(net_addr.m_port);
 }
 
 addrinfo* AllocAddressesForHost(char const *host,

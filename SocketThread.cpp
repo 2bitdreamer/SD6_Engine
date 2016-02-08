@@ -67,20 +67,22 @@ void SocketThread::ProcessIncoming()
 	}
 }
 
+
+
 void SocketThread::ProcessOutgoing()
 {
 	NetPacket *packet = m_packetQueue->DequeueWrite();
 	while (nullptr != packet) {
 
-		sockaddr sockaddr;
+		sockaddr_storage sockstorage;
 		size_t addrlen;
-		SockAddrFromNetAddr(&sockaddr, &addrlen, packet->m_address);
+		SockAddrFromNetAddr((sockaddr*)(&sockstorage), &addrlen, packet->m_address);
 
 		int sent = sendto(m_thisSocket,
 			(char*)packet->GetBuffer(),
 			packet->GetLength(),
 			0,
-			&sockaddr,
+			(sockaddr*)&sockstorage,
 			addrlen);
 
 		FATAL_ASSERT(sent != SOCKET_ERROR);
