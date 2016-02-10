@@ -2,6 +2,7 @@
 #include "NetAddress.hpp"
 #include "NetConnection.hpp"
 #include "NetMessage.hpp"
+#include "Utilities\DevConsole.hpp"
 
 void NetSession::Shutdown()
 {
@@ -51,19 +52,98 @@ void NetSession::SendMessage(NetMessage* msg) {
 	delete msg;
 }
 
+bool NetSession::ValidatePacket(NetPacket* pack)
+{
+	size_t packetLen = pack->GetLength();
+
+	if (packetLen < 3) {
+		DevConsole* devConsole = DevConsole::GetInstance();
+		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet length does not include header");
+		return false;
+	}
+
+	int byteAt = 0;
+	uint16_t ack = *(uint16_t*)pack->m_buffer;
+	byteAt += sizeof(uint16_t);
+
+	uint8_t messageCount = *(uint8_t*)(pack->m_buffer + byteAt);
+	byteAt += sizeof(uint8_t);
+
+	size_t totalMessagesLength = 0;
+
+	for (uint8_t messageIndex = 0; messageIndex < messageCount; messageIndex++) {
+		uint16_t messageLen = *(uint16_t*)(pack->m_buffer + byteAt);
+		totalMessagesLength += messageLen;
+		byteAt += messageLen;
+	}
+
+	if ((totalMessagesLength + 3) != (packetLen)) {
+		DevConsole* devConsole = DevConsole::GetInstance();
+		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet length does not include header");
+		return false;
+	}
+
+	return true;
+
+}
+
+void NetSession::ExtractMessages(NetPacket* pack) {
+	size_t byteAt = 2;
+	uint8_t messageCount = *(uint8_t*)(pack->m_buffer + byteAt);
+	byteAt += sizeof(uint8_t);
+
+	for (uint8_t messageIndex = 0; messageIndex < messageCount; messageIndex++) {
+		NetMessage* nm = new NetMessage();
+
+		uint16_t messageLen = *(uint16_t*)(pack->m_buffer + byteAt);
+		byteAt += sizeof(uint16_t);
+		nm->SetLength(messageLen);
+
+		uint8_t messageType = *(uint8_t*)(pack->m_buffer + byteAt);
+		byteAt += sizeof(uint8_t);
+		
+		memcpy( nm->m_buffer, pack->m_buffer + byteAt, messageLen - 3);
+		byteAt += (messageLen - 3);
+
+		nm->m_messageDefinition = NetMessage::GetNetMessageDefinitionByID(messageType);
+		nm->m_messageDefinition->m_callback(FindConnection(pack->GetAddress()), nm);
+	}
+
+}
 
 void NetSession::Tick() {
+
 	//Ticks all connections if time
+	/*if (m_listening) {*/
+		NetPacket* pack = m_packetQueue.DequeueRead();
+		if (pack) {
+			bool packetValid = ValidatePacket(pack);
+			if (!packetValid) {
+				DevConsole* devConsole = DevConsole::GetInstance();
+				devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet did not validate");
+			}
+			else {
+				ExtractMessages(pack);
+			}
+		}
+
+		for (auto it = m_connections.begin(); it != m_connections.end(); ++it) {
+			NetConnection* conn = *it;
+			if (conn->m_lastSentTime >= conn->m_tickFrequency) {
+				conn->Tick();
+			}
+		}
 }
 
 NetConnection* NetSession::AddConnection(const NetAddress& addr) {
 	NetConnection* connection = new NetConnection();
+	connection->m_owningSession = this;
 	connection->m_netAddress = addr;
 	m_connections.push_back(connection);
 	return connection;
 }
 
-NetConnection* NetSession::FindConnection(const NetAddress& addr) {
+NetConnection* NetSession::FindConnection(NetAddress* addr) {
 	for (auto it = m_connections.begin(); it != m_connections.end(); ++it) {
 		NetConnection* nc = *it;
 		NetAddress na = nc->m_netAddress;

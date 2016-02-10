@@ -40,6 +40,7 @@ public:
 	static int GetNumWords(std::string strToTest);
 	void DrawBlinkingCursor();
 	void DrawConsoleBox();
+	static DevConsole* GetInstance();
 public:
 	int m_frameCounter;
 	float m_lineHeight;

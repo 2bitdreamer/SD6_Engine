@@ -19,6 +19,7 @@ public:
 	size_t m_numBytesWritten;
 	size_t m_numBytesRead;
 
+	ByteBuffer();
 	void Init(void* buffer, size_t max_size);
 
 	// When you write, you write to the end of the buffer
@@ -62,7 +63,7 @@ public:
 
 	NetPacket();
 	NetPacket(void *data, size_t data_len, sockaddr* saddr);
-	NetAddress const* GetAddress() const;
+	NetAddress* GetAddress();
 	unsigned char* GetBuffer();
 	size_t BytesRemaining();
 

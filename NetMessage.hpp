@@ -8,9 +8,12 @@ class NetMessage;
 
 constexpr size_t const NetMessage_MTU = 1024;
 
-typedef void(NetMessageReceived)(NetConnection*, NetMessage& msg);
+typedef void(NetMessageReceived)(NetConnection*, NetMessage* msg);
 
 struct NetMessageDefinition {
+	NetMessageDefinition() :
+		m_id(0) {}
+
 	std::string m_name;
 	uint8_t m_id;
 	NetMessageReceived* m_callback;
@@ -32,8 +35,8 @@ public:
 	static void RegisterMessageDefinition(uint8_t id, NetMessageDefinition def);
 	size_t GetRequiredSpaceInPacket() const;
 	void SetMessageData(void* data, size_t dataLen);
+
 public:
-	unsigned char m_buffer[NetMessage_MTU];
 	NetMessageDefinition* m_messageDefinition;
 };
 

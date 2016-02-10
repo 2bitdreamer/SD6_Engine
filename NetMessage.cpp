@@ -1,12 +1,13 @@
 #include "NetMessage.hpp"
 #include "NetPacket.hpp"
 #include <map>
+#include "Utilities\DevConsole.hpp"
 
 static std::map<uint8_t, NetMessageDefinition> g_messageDefinitions;
 
 NetMessage::NetMessage(uint8_t id) {
 	m_messageDefinition = NetMessage::GetNetMessageDefinitionByID(id);
-	//FATAL_ASSERT(m_messageDefinition != nullptr);
+	FATAL_ASSERT(m_messageDefinition != nullptr);
 	Init(&m_buffer, NetMessage_MTU);
 	//WriteBytes((void*)id, sizeof(uint8_t));
 }
@@ -23,6 +24,7 @@ NetMessage::NetMessage(NetMessage* msgToCopy) {
 	memcpy(&m_buffer, msgToCopy->GetBuffer(), msgToCopy->GetLength());
 	m_messageDefinition = msgToCopy->m_messageDefinition;
 	m_numBytesWritten = msgToCopy->m_numBytesWritten;
+	m_maxSize = msgToCopy->m_maxSize;
 }
 
 NetMessage::NetMessage(NetPacket& packet)
@@ -32,7 +34,7 @@ NetMessage::NetMessage(NetPacket& packet)
 
 NetMessage::NetMessage()
 {
-	Init(&m_buffer, 0);
+	Init(&m_buffer, PACKET_MTU);
 }
 
 NetMessageDefinition* NetMessage::GetNetMessageDefinitionByName(const std::string& name) {

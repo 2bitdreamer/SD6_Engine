@@ -35,6 +35,8 @@ public:
 	void SendMessage(NetMessage* msg);
 	void Tick();
 	NetConnection* AddConnection(const NetAddress& addr);
-	NetConnection* FindConnection(const NetAddress& addr);
+	NetConnection* FindConnection(NetAddress* addr);
 	const char* GetHostAddrName() const;
+	bool ValidatePacket(NetPacket* pack);
+	void ExtractMessages(NetPacket* pack);
 };

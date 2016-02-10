@@ -18,7 +18,7 @@
 
 static std::deque<ConsoleLine> g_consoleLines;
 static std::map<std::string, ConsoleFunction*> g_messageDefinitions;
-static NetSession* g_netSession = nullptr;
+static NetSession* g_gameSession = nullptr;
 
 
 const float g_lineSpaceMult = 1.f;
@@ -131,19 +131,24 @@ void CommandAddConnection(const ConsoleCommandArgs& ca) {
 	NetAddress netAddr;
 	memcpy(&netAddr.m_addr, ip.c_str(), ip.size());
 	netAddr.m_port = port;
-	g_netSession->AddConnection(netAddr);
+	g_gameSession->AddConnection(netAddr);
 }
 
 void CommandCreateSession(const ConsoleCommandArgs& args) {
-	short port = atoi(args.m_argsList[1].c_str());
+	short port = (short)atoi(args.m_argsList[1].c_str());
+	g_gameSession = NetSystem::GetInstance()->CreateSession();
 
-	g_netSession->Host(port);
-	//ConsolePrintf("%i", RGBA(0, 255, 0, 255), "Session created on port", port);
-	//g_netSession->Listen(true);
+	DevConsole* devC = DevConsole::GetInstance();
+	devC->ConsolePrintf("%s %i", RGBA(0, 255, 0, 255), "Session created a on port", port);
+
+	g_gameSession->Listen(true);
+	g_gameSession->Host(port);
+
 }
 
 size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable)
 {
+	(void)family;
 	addrinfo* addresses = AllocAddressesForHost(hostname.c_str(), std::to_string(port).c_str(), AF_INET, SOCK_DGRAM, bindable);
 	
 	size_t c = 0;
@@ -168,7 +173,7 @@ size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, cons
 void CommandPing(const ConsoleCommandArgs& args) {
 		FATAL_ASSERT(args.m_argsList.size() == 4);
 
-		unsigned short port = atoi(args.m_argsList[2].c_str());
+		unsigned short port = (unsigned short)atoi(args.m_argsList[2].c_str());
 		std::string ip = args.m_argsList[1];
 
 		//construct packet, put the net message in it, push back to outgoing queue
@@ -177,7 +182,6 @@ void CommandPing(const ConsoleCommandArgs& args) {
 		toAddr.m_port = port;
 
 		NetPacket* packet = new NetPacket();
-		//packet->CreateHeader();
 
 		packet->m_address = toAddr;
 		NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
@@ -189,8 +193,7 @@ void CommandPing(const ConsoleCommandArgs& args) {
 		
 		packet->UpdateNumMessages();
 
-		g_netSession->SendPacket(packet);
-		//?
+		g_gameSession->SendPacket(packet);
 }
 
 
@@ -211,7 +214,6 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("createsession"), CommandCreateSession);
 	RegisterFunction(std::string("add_connection"), CommandAddConnection);
 
-	g_netSession = NetSystem::GetInstance()->CreateSession();
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);
 	//std::vector<std::pair<RGBA, int>> hiColors;
@@ -261,6 +263,12 @@ void DevConsole::DrawConsoleBox() {
 	myRenderer.RenderPrimitives(GL_QUADS, consoleVertices);
 }
 
+DevConsole* DevConsole::GetInstance()
+{
+	DevConsole* devConsole = new DevConsole();
+	return devConsole;
+}
+
 void DevConsole::ConsolePrintf(const char *fmt, RGBA color, ...) {
 	va_list args;
 	va_start(args, color);
@@ -288,7 +296,7 @@ void DevConsole::vConsolePrintf(const char* fmt, RGBA color, va_list args) {
 	char theStr[1024] = {'\0'};
 	vsnprintf(theStr, 127, fmt, args);
 	std::vector<std::pair<RGBA, int>> vPrintfColor;
-	std::string testNumWords = std::string(fmt);
+	std::string testNumWords = std::string(theStr);
 	int numWords = GetNumWords(testNumWords);
 	vPrintfColor.push_back(std::make_pair(color,  numWords));
 	ConsolePrint(theStr, vPrintfColor);

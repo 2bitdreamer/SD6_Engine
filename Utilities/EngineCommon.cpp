@@ -141,7 +141,7 @@ size_t GetAddressName(char *buffer, size_t const buffer_size, sockaddr const *sa
 
 	uint16_t port = GetAddressPort(sa);
 
-	size_t len = min(buffer_size - 1, strlen(addr_name));
+	//size_t len = min(buffer_size - 1, strlen(addr_name));
 	return sprintf_s(buffer, buffer_size, "%s:%i", addr_name, port);
 }
 

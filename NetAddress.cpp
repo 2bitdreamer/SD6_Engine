@@ -7,12 +7,12 @@
 
 #include <winsock2.h>
 #include "Assert.hpp"
+#include <ws2tcpip.h>
 
 void NetAddress::Init(sockaddr* saddr)
 {
-// 	sockaddr_in* ain = (sockaddr_in*)saddr;
-// 	memcpy((void*)m_addr, ain->sin_addr.S_un.S_addr, m_)
-// 	m_port = ain->sin_port;
-// 	FATAL_ASSERT(ain->sin_family == AF_INET);
+	sockaddr_in* ain = (sockaddr_in*)saddr;
+	m_port = ain->sin_port;
+	inet_ntop(AF_INET, &ain->sin_addr, (PSTR)m_addr, 16);
 }
 

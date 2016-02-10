@@ -39,14 +39,15 @@ NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
 	m_address.Init(saddr);
 }
 
-NetPacket::NetPacket() :
+NetPacket::NetPacket() : 
+	ByteBuffer(),
 	m_msgCount(0)
 {
 	ByteBuffer::Init(m_buffer, PACKET_MTU);
 	CreateHeader();
 }
 
-const NetAddress* NetPacket::GetAddress() const
+NetAddress* NetPacket::GetAddress()
 {
 	return &m_address;
 }
@@ -59,6 +60,13 @@ unsigned char* NetPacket::GetBuffer()
 size_t NetPacket::BytesRemaining()
 {
 	return m_maxSize - m_numBytesWritten;
+}
+
+
+
+ByteBuffer::ByteBuffer()
+{
+	ByteBuffer::Init(m_buffer, PACKET_MTU);
 }
 
 void ByteBuffer::Init(void* buffer, size_t max_size)

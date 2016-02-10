@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 class NetSession;
 class UDPSocket;
@@ -22,10 +23,13 @@ public:
 	void FreeSocket(UDPSocket* socket);
 	NetSession* CreateSession();
 	void DestroySession(NetSession* s);
+	void Tick();
+
+public:
+	std::vector<NetSession*> m_networkSessions;
+
 };
 
-void Ping(NetConnection* nc, NetMessage& msg);
-
-
-
+void PingCallback(NetConnection*, NetMessage* msg);
+void PongCallback(NetConnection*, NetMessage* msg);
 

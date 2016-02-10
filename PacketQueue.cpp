@@ -19,7 +19,7 @@ NetPacket* NetPacketQueue::DequeueWrite()
 	if (m_outgoing.dequeue(&packet)) {
 		return packet;
 	}
-
+	
 	return nullptr;
 }
 
@@ -47,14 +47,14 @@ NetPacket* NetPacketQueue::DequeueRead()
 
 void NetPacketQueue::DestroyAll()
 {
-	for (int num = 0; num < m_incoming.size(); num++) {
+	for (unsigned int num = 0; num < m_incoming.size(); num++) {
 		NetPacket* pack = nullptr;
 		m_incoming.dequeue(&pack);
 		if (pack)
 			delete pack;
 	}
 
-	for (int num = 0; num < m_incoming.size(); num++) {
+	for (unsigned int num = 0; num < m_incoming.size(); num++) {
 		NetPacket* pack = nullptr;
 		m_outgoing.dequeue(&pack);
 		if (pack)
