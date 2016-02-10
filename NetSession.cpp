@@ -122,6 +122,7 @@ void NetSession::Tick() {
 			if (!packetValid) {
 				DevConsole* devConsole = DevConsole::GetInstance();
 				devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet did not validate");
+				delete pack;
 			}
 			else {
 				ExtractMessages(pack);
