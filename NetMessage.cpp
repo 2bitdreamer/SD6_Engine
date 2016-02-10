@@ -30,6 +30,7 @@ NetMessage::NetMessage(NetMessage* msgToCopy) {
 NetMessage::NetMessage(NetPacket& packet)
 {
 	//Will read the length and id off the packet, and assert the id is valid.  Will also set max readable bytes.
+	(void)packet;
 }
 
 NetMessage::NetMessage()

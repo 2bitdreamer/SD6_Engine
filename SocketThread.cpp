@@ -48,7 +48,7 @@ void SocketThread::ProcessIncoming()
 			(int*)&addrlen);                // Address size in/out (storage/result)
 
 		if (recvd > 0) {
-			m_packetQueue->EnqueueIncoming(buffer, recvd, (sockaddr*)&their_addr, addrlen);
+			m_packetQueue->EnqueueIncoming(buffer, recvd, (sockaddr*)&their_addr);
 		}
 		else if (recvd < 0) {
 			int error = WSAGetLastError();

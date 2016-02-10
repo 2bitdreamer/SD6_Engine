@@ -13,10 +13,10 @@ private:
 
 public:
 	void EnqueueOutgoing(NetPacket *packet);
-	void EnqueueOutgoing(unsigned char *buffer, size_t len, sockaddr* addr, size_t addr_len);
+	void EnqueueOutgoing(unsigned char *buffer, size_t len, sockaddr* addr);
 	NetPacket* DequeueWrite();
 	void EnqueueIncoming(NetPacket *packet);
-	void EnqueueIncoming(unsigned char* buffer, size_t len, sockaddr* addr, size_t addr_len);
+	void EnqueueIncoming(unsigned char* buffer, size_t len, sockaddr* addr);
 	NetPacket* DequeueRead();
 	void DestroyAll();
 };

@@ -21,9 +21,12 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 void NetPacket::CreateHeader()
 {
 	unsigned short packetAckID = 0xffff;
+
 	WriteBytes(&packetAckID, sizeof(unsigned short));
 	UpdateNumMessages();
 	m_numBytesWritten++;
+
+	//packetAckID++;
 }
 
 void NetPacket::UpdateNumMessages()
@@ -77,7 +80,7 @@ void ByteBuffer::Init(void* buffer, size_t max_size)
 	m_numBytesRead = 0;
 }
 
-bool ByteBuffer::WriteBytes(const void *data, size_t size, bool advanceBuffer/*=true*/)
+bool ByteBuffer::WriteBytes(const void *data, size_t size)
 {
 	if ((m_numBytesWritten + size) > m_maxSize)
 		return false;

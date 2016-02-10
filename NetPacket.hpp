@@ -26,7 +26,7 @@ public:
 	// @return 
 	//    true:  Was enough room and was written
 	//    false: Not enough room, and was not written.
-	bool WriteBytes(const void *data, size_t size, bool advanceBuffer=true);
+	bool WriteBytes(const void *data, size_t size);
 
 	// Reads from buffer, copying data up to size into data
 	// @return 

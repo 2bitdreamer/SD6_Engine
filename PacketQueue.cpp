@@ -1,7 +1,7 @@
 #include "PacketQueue.hpp"
 #include "NetPacket.hpp"
 
-void NetPacketQueue::EnqueueOutgoing(unsigned char *buffer, size_t len, sockaddr* addr, size_t addr_len)
+void NetPacketQueue::EnqueueOutgoing(unsigned char *buffer, size_t len, sockaddr* addr)
 {
 	NetPacket *packet = new NetPacket(buffer, len, addr);
 	packet->SetLength(len);
@@ -23,7 +23,7 @@ NetPacket* NetPacketQueue::DequeueWrite()
 	return nullptr;
 }
 
-void NetPacketQueue::EnqueueIncoming(unsigned char* buffer, size_t len, sockaddr* addr, size_t addr_len)
+void NetPacketQueue::EnqueueIncoming(unsigned char* buffer, size_t len, sockaddr* addr)
 {
 	NetPacket *packet = new NetPacket(buffer, len, addr);
 	packet->SetLength(len);

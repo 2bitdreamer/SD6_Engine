@@ -123,6 +123,22 @@ void CommandQuit(const ConsoleCommandArgs&) {
 	exit(1);
 }
 
+void CommandTestSend(const ConsoleCommandArgs& args) {
+	int numMessages = atoi(args.m_argsList[1].c_str());
+
+	for (int index = 0; index < numMessages; index++) {
+		NetMessage* msg = new NetMessage(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+
+		std::string stringData = "TESTSEND MESSAGE " ;
+		stringData += (char)index;
+
+		size_t dataLength = stringData.size();
+
+		msg->SetMessageData((void*)stringData.c_str(), dataLength);
+		g_gameSession->SendMessage(msg);
+	}
+}
+
 void CommandAddConnection(const ConsoleCommandArgs& ca) {
 
 	std::string ip = ca.m_argsList[1];
@@ -213,6 +229,7 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("ping"), CommandPing);
 	RegisterFunction(std::string("createsession"), CommandCreateSession);
 	RegisterFunction(std::string("add_connection"), CommandAddConnection);
+	RegisterFunction(std::string("test_send"), CommandTestSend);
 
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);

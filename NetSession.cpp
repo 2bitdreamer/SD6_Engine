@@ -3,6 +3,7 @@
 #include "NetConnection.hpp"
 #include "NetMessage.hpp"
 #include "Utilities\DevConsole.hpp"
+#include "Utilities\Time.hpp"
 
 void NetSession::Shutdown()
 {
@@ -63,7 +64,7 @@ bool NetSession::ValidatePacket(NetPacket* pack)
 	}
 
 	int byteAt = 0;
-	uint16_t ack = *(uint16_t*)pack->m_buffer;
+	//uint16_t ack = *(uint16_t*)pack->m_buffer;
 	byteAt += sizeof(uint16_t);
 
 	uint8_t messageCount = *(uint8_t*)(pack->m_buffer + byteAt);
@@ -79,7 +80,7 @@ bool NetSession::ValidatePacket(NetPacket* pack)
 
 	if ((totalMessagesLength + 3) != (packetLen)) {
 		DevConsole* devConsole = DevConsole::GetInstance();
-		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet length does not include header");
+		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Message data size not equal to size claimed");
 		return false;
 	}
 
@@ -129,7 +130,7 @@ void NetSession::Tick() {
 
 		for (auto it = m_connections.begin(); it != m_connections.end(); ++it) {
 			NetConnection* conn = *it;
-			if (conn->m_lastSentTime >= conn->m_tickFrequency) {
+			if ((conn->m_lastSentTime + conn->m_tickFrequency) < GetAbsoluteTimeSeconds()) {
 				conn->Tick();
 			}
 		}
@@ -140,16 +141,21 @@ NetConnection* NetSession::AddConnection(const NetAddress& addr) {
 	connection->m_owningSession = this;
 	connection->m_netAddress = addr;
 	m_connections.push_back(connection);
+
+	DevConsole* devConsole = DevConsole::GetInstance();
+	devConsole->ConsolePrintf("%s %s %s %i", RGBA(0, 255, 0, 255), "Added connection to address ", addr.m_addr, "and port ", addr.m_port);
+
 	return connection;
 }
 
 NetConnection* NetSession::FindConnection(NetAddress* addr) {
 	for (auto it = m_connections.begin(); it != m_connections.end(); ++it) {
 		NetConnection* nc = *it;
-		NetAddress na = nc->m_netAddress;
-		if (nc->m_netAddress == na) {
+		NetAddress* na = &nc->m_netAddress;
+		if (addr == na) {
 			return nc;
 		}
 	}
+
 	return nullptr;
 }

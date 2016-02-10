@@ -37,7 +37,7 @@ class ThreadSafeQueue
 		{
 			size_t size = 0;
 			m_cs.Enter();
-			m_queue.size();
+			size = m_queue.size();
 			m_cs.Exit();
 
 			return size;

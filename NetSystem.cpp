@@ -5,6 +5,7 @@
 #include "NetMessage.hpp"
 #include "Utilities\DevConsole.hpp"
 #include "NetConnection.hpp"
+#include <functional>
 
 NetSystem* NetSystem::GetInstance()
 {
@@ -74,12 +75,29 @@ void NetSystem::DestroySession(NetSession* s)
 
 void PingCallback(NetConnection* nc, NetMessage* msg) {
 	DevConsole* devC = DevConsole::GetInstance();
-	devC->ConsolePrintf("%s %s", RGBA(255, 0, 0, 255), "Received ping from ", nc->m_netAddress);
+
+	if (nc)
+		devC->ConsolePrintf("%s %s", RGBA(0, 0, 255, 255), "Received ping from ", nc->m_netAddress.m_addr);
+	else 
+		devC->ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received ping");
+
+
+	std::string test = std::string((char*)msg->GetBuffer());
+	devC->ConsolePrintf("%s %s", RGBA(0, 0, 255, 255), "Message Data: ", test.c_str());
 }
 
 void PongCallback(NetConnection* nc, NetMessage* msg) {
 	DevConsole* devC = DevConsole::GetInstance();
-	devC->ConsolePrintf("%s %s", RGBA(0, 255, 0, 255), "Received pong from ", nc->m_netAddress);
+
+	if (nc) {
+		devC->ConsolePrintf("%s %s", RGBA(0, 255, 0, 255), "Received pong from ", nc->m_netAddress);
+	}
+	else {
+		devC->ConsolePrintf("%s %s", RGBA(0, 255, 0, 255), "Received pong ");
+	}
+
+	std::string test = std::string((char*)msg->GetBuffer());
+	devC->ConsolePrintf("%s %s", RGBA(0, 0, 255, 255), "Message Data: ", test.c_str());
 }
 
 void NetSystem::Tick()

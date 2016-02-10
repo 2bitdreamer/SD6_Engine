@@ -1,6 +1,7 @@
 #include "NetConnection.hpp"
 #include "NetMessage.hpp"
 #include "NetSession.hpp"
+#include "Utilities\Time.hpp"
 
 
 
@@ -26,20 +27,23 @@ void NetConnection::Tick()
 	//put as many messages as you can in packet
 	//Send
 
-	NetPacket* packet = new NetPacket();
+	if (m_outgoingMessages.size() > 0) {
 
-	packet->m_address = m_netAddress;
-	NetMessage msg(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+		NetPacket* packet = new NetPacket();
 
-	for (int index = 0; index < m_outgoingMessages.size(); index++) {
-		NetMessage* netMsg;
-		m_outgoingMessages.dequeue(&netMsg);
-		packet->AddMessage(msg);
+		packet->m_address = m_netAddress;;
+
+		for (int index = 0; index < m_outgoingMessages.size(); index++) {
+			NetMessage* netMsg;
+			m_outgoingMessages.dequeue(&netMsg);
+			packet->AddMessage(netMsg);
+		}
+
+		packet->UpdateNumMessages();
+
+		m_owningSession->SendPacket(packet);
+		m_lastSentTime = (float)GetAbsoluteTimeSeconds();
 	}
-
-	packet->UpdateNumMessages();
-
-	m_owningSession->SendPacket(packet);
 
 }
 
