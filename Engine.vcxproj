@@ -179,9 +179,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Assert.cpp" />
+    <ClCompile Include="BitArray.cpp" />
     <ClCompile Include="CalculateOrderJob.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Command.cpp" />
+    <ClCompile Include="EventSystem.cpp" />
+    <ClCompile Include="NamedProperties.cpp" />
     <ClCompile Include="NetConnection.cpp" />
     <ClCompile Include="GenerateFilesJob.cpp" />
     <ClCompile Include="Graphics\Camera3D.cpp" />
@@ -232,9 +235,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.hpp" />
+    <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="CalculateOrderJob.hpp" />
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Command.hpp" />
+    <ClInclude Include="EventSystem.hpp" />
+    <ClInclude Include="NamedProperties.hpp" />
     <ClInclude Include="NetConnection.hpp" />
     <ClInclude Include="GenerateFilesJob.hpp" />
     <ClInclude Include="Graphics\Camera3D.hpp" />

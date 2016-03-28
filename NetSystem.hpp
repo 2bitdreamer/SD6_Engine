@@ -6,6 +6,7 @@ class UDPSocket;
 class NetPacketQueue;
 class NetConnection;
 class NetMessage;
+struct net_sender_t;
 
 class NetSystem
 {
@@ -21,7 +22,7 @@ public:
 	// Be sure to call .join on the socket before freeing the memory
 	// otherwise you will have thread issues.   
 	void FreeSocket(UDPSocket* socket);
-	NetSession* CreateSession();
+	NetSession* CreateSession(short port);
 	void DestroySession(NetSession* s);
 	void Tick();
 
@@ -30,6 +31,14 @@ public:
 
 };
 
-void PingCallback(NetConnection*, NetMessage* msg);
-void PongCallback(NetConnection*, NetMessage* msg);
-
+void PingCallback(net_sender_t &from, NetMessage* msg);
+void PongCallback(net_sender_t &from, NetMessage* msg);
+void HeartbeatCallback(net_sender_t& from, NetMessage* msg);
+void InOrderTestCallback(net_sender_t& from, NetMessage* msg);
+void JoinAcceptCallback(net_sender_t& from, NetMessage* msg);
+void JoinRequestCallback(net_sender_t& from, NetMessage* msg);
+void StartTestCallback(net_sender_t& from, NetMessage* msg);
+void JoinDenyCallback(net_sender_t& from, NetMessage* msg);
+void AckCallback(net_sender_t& from, NetMessage* msg);
+void LeaveCallback(net_sender_t& from, NetMessage* msg);
+void ForceTestCallback(net_sender_t& from, NetMessage* msg);

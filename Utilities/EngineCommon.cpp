@@ -1,4 +1,4 @@
-//#define ENABLEPRINTS
+#define ENABLEPRINTS
 
 #ifdef WIN32 
 #include <Windows.h>
@@ -22,6 +22,8 @@
 #include "../NetAddress.hpp"
 #include <ws2tcpip.h>
 #include "../Assert.hpp"
+#include "../EventSystem.hpp"
+
 
 bool g_isQuitting = false;
 
@@ -53,6 +55,8 @@ void ReportAllocations()
 #endif
 }
 */
+
+
 
 // get sockaddr, IPv4 or IPv6:
  void* GetInAddr(sockaddr const *sa)
@@ -101,10 +105,11 @@ addrinfo* AllocAddressesForHost(char const *host,
 		host = "localhost";
 	}
 
-	memset(&hints, 0, sizeof(hints));
-
 	// Which network layer it's using - usually want to UNSPEC, since it doesn't matter.  But since we're hard coding
 	// the client sides connection, we will likely want to use AF_INET when we want to bind an address
+
+	memset(&hints, 0, sizeof(hints));
+
 	hints.ai_family = family;
 
 	hints.ai_socktype = socktype; // STREAM based, determines transport layer (TCP)
@@ -323,6 +328,7 @@ void FindAllFilesOfType(const std::string& directory, const std::string& searchP
 
 	std::string file = directory + "/" + searchPattern;
 	intptr_t searchHandle = _findfirst(file.c_str(), &fileInfo);
+
 	while (searchHandle != -1 && !error) {
 		bool isADirectory = fileInfo.attrib & _A_SUBDIR ? true : false;
 
@@ -336,6 +342,7 @@ void FindAllFilesOfType(const std::string& directory, const std::string& searchP
 
 		error = _findnext(searchHandle, &fileInfo);
 	}
+
 	_findclose(searchHandle);
 }
 
@@ -655,6 +662,24 @@ bool FlushStringToDisk(const std::string& filePath, const std::string& stringToW
 }
 
 
+void FireEvent(const std::string& eventName, NamedProperties& args /*= NamedProperties()*/)
+{
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.FireEvent(eventName, args);
+}
+
+void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
+{
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.RegisterEvent(eventName, callbackFunc);
+}
+
+void UnregisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
+{
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.UnregisterEvent(eventName, callbackFunc);
+}
+
 bool LoadFileToExistingTextBuffer(std::string& filePath, char* &out_textBuffer, size_t bufferSizeLimit)
 {
 	FILE* fp;
@@ -909,4 +934,12 @@ RectA::RectA(float xMinp, float yMinp, float widthp, float heightp)
 	yMin = yMinp;
 	width = widthp;
 	height = heightp;
+}
+
+RectA::RectA()
+{
+	yMin = 0.f;
+	width = 0.f;
+	height = 0.f;
+	xMin = 0.f;
 }

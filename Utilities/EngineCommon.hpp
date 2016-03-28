@@ -28,10 +28,12 @@
 #endif
 
 #include <winsock2.h>
+#include "../NamedProperties.hpp"
 struct addrinfo;
 #define nothrow void
 class NetAddress;
 
+typedef void (EventCallback)(NamedProperties& args);
 
 
 extern Win32Wrapper myWinWrapper;
@@ -75,6 +77,28 @@ struct MouseState {
 		m_hasLeftButtonJustBeenReleased(false) {}
 };
 
+struct RectA {
+	float xMin, yMin, width, height;
+	RectA(float xMinp, float yMinp, float widthp, float heightp);
+	RectA();
+};
+
+enum Direction
+{
+	EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST, NORTH, NORTHEAST, NUM_DIRECTIONS
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+enum CardinalDir
+{
+	C_DIRECTION_NONE = 0,
+	C_DIRECTION_EAST = 1,
+	C_DIRECTION_NORTH = 2,
+	C_DIRECTION_WEST = 3,
+	C_DIRECTION_SOUTH = 4,
+	NUM_C_DIRECTIONS
+};
+
 struct TextLine {
 	TextLine::TextLine() :
 		m_color(RGBA(0, 0, 100, 255)),
@@ -112,16 +136,7 @@ size_t GetAddressName(char *buffer, size_t const buffer_size, sockaddr const *sa
 
 void ForEachAddress(addrinfo *addresses, address_work_cb cb, void *user_arg);
 
-struct RectA {
-	float xMin, yMin, width, height;
-	RectA(float xMinp, float yMinp, float widthp, float heightp);
-	RectA();
-};
 
-enum Direction
-{
-	EAST, SOUTHEAST, SOUTH, SOUTHWEST, WEST, NORTHWEST, NORTH, NORTHEAST, NUM_DIRECTIONS
-};
 
 const std::string Stringf( const char* format, ... );
 
@@ -159,10 +174,11 @@ bool FlushByteBufferToDisk(const std::string& filePath, const unsigned char* byt
 bool FlushByteVectorToDisk(const std::string& filePath, const std::vector< unsigned char >& byteVector);
 bool FlushStringToDisk(const std::string& filePath, const std::string& stringToWrite);
 
-
+void FireEvent(const std::string& eventName, NamedProperties& args = NamedProperties());
+void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
+void UnregisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
 
 //void ReportAllocations();
-
 
 float DegreesToRadians(float deg);
 bool IsLittleEndian();

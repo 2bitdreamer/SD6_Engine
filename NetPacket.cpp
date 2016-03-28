@@ -9,8 +9,14 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 		return false;
 	}
 
-	Write<uint16_t>((uint16_t)msgLen + 3); 
+	size_t headerSize = msg.ComputeHeaderSize();
+
+	Write<uint16_t>((uint16_t)msgLen + headerSize); 
 	Write<uint8_t>((uint8_t)(msg.m_messageDefinition->m_id));
+
+	if (msg.IsReliable()) {
+		Write<uint16_t>(msg.m_reliableID);
+	}
 
 	WriteBytes(msg.m_buffer, msg.GetLength());
 	++m_msgCount;
@@ -21,17 +27,45 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 void NetPacket::CreateHeader()
 {
 	unsigned short packetAckID = 0xffff;
+	unsigned char connectionID = 0xffff;
 
+// 	memcpy(m_buffer, &connectionID, sizeof(unsigned char));
+// 	memcpy(m_buffer + sizeof(unsigned char), &packetAckID, sizeof(unsigned short));
+
+	WriteBytes(&connectionID, sizeof(unsigned char));
 	WriteBytes(&packetAckID, sizeof(unsigned short));
+
 	UpdateNumMessages();
+
 	m_numBytesWritten++;
 
 	//packetAckID++;
 }
 
+void NetPacket::CreateHeader(unsigned char connID, unsigned short ackID)
+{
+	unsigned char connectionID = connID;
+	unsigned short packetAckID = ackID;
+
+	memcpy(m_buffer, &connectionID, sizeof(unsigned char));
+	memcpy(m_buffer + sizeof(unsigned char), &packetAckID, sizeof(unsigned short));
+
+	UpdateNumMessages();
+
+	if (m_numBytesWritten == 0)
+		m_numBytesWritten += (sizeof(unsigned char) + sizeof(unsigned short) + 1);
+
+	//packetAckID++;
+}
+
+
+void NetPacket::SetAck(unsigned short ack) {
+	memcpy(m_buffer, &ack, sizeof(unsigned short));
+}
+
 void NetPacket::UpdateNumMessages()
 {
-	m_buffer[2] = (uint8_t)m_msgCount;
+	m_buffer[3] = (uint8_t)m_msgCount;
 }
 
 NetPacket::NetPacket(void *data, size_t data_len, sockaddr* saddr) :
@@ -101,7 +135,7 @@ size_t ByteBuffer::GetLength() const
 
 unsigned char* ByteBuffer::GetBuffer()
 {
-	m_buffer[m_numBytesWritten] = '\0';
+	//m_buffer[m_numBytesWritten] = '\0';
 	return m_buffer;
 }
 

@@ -179,6 +179,15 @@
     <ClCompile Include="NetMessage.cpp">
       <Filter>Networking</Filter>
     </ClCompile>
+    <ClCompile Include="BitArray.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="NamedProperties.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="EventSystem.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\EulerAngles.hpp">
@@ -345,6 +354,15 @@
     </ClInclude>
     <ClInclude Include="NetMessage.hpp">
       <Filter>Networking</Filter>
+    </ClInclude>
+    <ClInclude Include="BitArray.hpp">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="NamedProperties.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="EventSystem.hpp">
+      <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

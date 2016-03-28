@@ -2,26 +2,25 @@
 #include "NetSystem.hpp"
 #include <vector>
 #include "PacketQueue.hpp"
+#include "NetConnection.hpp"
 class UDPSocket;
 class NetAddress;
-class NetConnection;
 
 // ENGINE
 class NetSession
 {
-private:
-	NetPacketQueue m_packetQueue;
+public:
 	std::vector<UDPSocket*> m_sockets;
 	std::vector<NetConnection*> m_connections;
-
+	NetConnection* m_me;
+	NetConnection* m_hostConnection;
+	NetPacketQueue m_packetQueue;
+	int m_maxConnections;
 	bool m_listening; // are we accepting new connections
 
 public:
-	NetSession()
-	{
-		m_listening = false;
-	}
 
+	NetSession();
 	void Shutdown();
 
 	// Starts the session as a host
@@ -32,11 +31,16 @@ public:
 
 	void SendPacket(NetPacket* packet);
 	void ReceivePacket(NetPacket* packet);
-	void SendMessage(NetMessage* msg);
+	void SendMsg(NetMessage* msg, NetConnection* nc);
 	void Tick();
-	NetConnection* AddConnection(const NetAddress& addr);
-	NetConnection* FindConnection(NetAddress* addr);
+	NetConnection* AddConnection(const NetAddress& addr, bool isHost);
+	NetConnection* FindConnectionByNetAddress(NetAddress* addr);
+	NetConnection* FindConnectionByIndex(int connID);
 	const char* GetHostAddrName() const;
 	bool ValidatePacket(NetPacket* pack);
 	void ExtractMessages(NetPacket* pack);
+	void ForceTestAll();
+	bool CanProcessMessage(uint16_t ack, net_sender_t& sender, NetMessage* msg);
+	void RemoveConnection(NetConnection * connection);
+	NetConnection* FindConnectionByID(const std::string& id);
 };

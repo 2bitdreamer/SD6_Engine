@@ -59,6 +59,8 @@ public:
 	bool AddMessage(const NetMessage& msg);
 
 	void CreateHeader();
+	void CreateHeader(unsigned char connectionID, unsigned short ackID);
+	void SetAck(unsigned short ack);
 	void UpdateNumMessages();
 
 	NetPacket();

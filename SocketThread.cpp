@@ -48,7 +48,9 @@ void SocketThread::ProcessIncoming()
 			(int*)&addrlen);                // Address size in/out (storage/result)
 
 		if (recvd > 0) {
-			m_packetQueue->EnqueueIncoming(buffer, recvd, (sockaddr*)&their_addr);
+			sockaddr_in* addr = (sockaddr_in*)&their_addr;
+			addr->sin_port = ntohs(addr->sin_port);
+			m_packetQueue->EnqueueIncoming(buffer, recvd, (sockaddr*)addr);
 		}
 		else if (recvd < 0) {
 			int error = WSAGetLastError();
@@ -85,6 +87,9 @@ void SocketThread::ProcessOutgoing()
 			(sockaddr*)&sockstorage,
 			addrlen);
 
+		if (sent == SOCKET_ERROR)
+			int err = WSAGetLastError();
+		
 		FATAL_ASSERT(sent != SOCKET_ERROR);
 
 		delete packet;

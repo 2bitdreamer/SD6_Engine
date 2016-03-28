@@ -62,6 +62,7 @@ struct ConsoleLine {
 };
 
 void CommandTestSend(const ConsoleCommandArgs&);
+void CommandForceTest(const ConsoleCommandArgs&);
 size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable);
 
 

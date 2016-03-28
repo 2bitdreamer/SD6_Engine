@@ -20,6 +20,12 @@ static std::deque<ConsoleLine> g_consoleLines;
 static std::map<std::string, ConsoleFunction*> g_messageDefinitions;
 static NetSession* g_gameSession = nullptr;
 
+/*
+// Add a new message - wherever you're doing this currently
+
+
+*/
+
 
 const float g_lineSpaceMult = 1.f;
 
@@ -124,22 +130,36 @@ void CommandQuit(const ConsoleCommandArgs&) {
 }
 
 void CommandTestSend(const ConsoleCommandArgs& args) {
-	int numMessages = atoi(args.m_argsList[1].c_str());
-
-	for (int index = 0; index < numMessages; index++) {
-		NetMessage* msg = new NetMessage(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
-
-		std::string stringData = "TESTSEND MESSAGE " ;
-		stringData += (char)index;
-
-		size_t dataLength = stringData.size();
-
-		msg->SetMessageData((void*)stringData.c_str(), dataLength);
-		g_gameSession->SendMessage(msg);
-	}
+// 	int numMessages = atoi(args.m_argsList[1].c_str());
+// 
+// 	for (int index = 0; index < numMessages; index++) {
+// 		NetMessage* msg = new NetMessage(NetMessage::GetNetMessageDefinitionByName("ping")->m_id);
+// 
+// 		std::string stringData = "TESTSEND MESSAGE " ;
+// 		stringData += (char)index;
+// 
+// 		size_t dataLength = stringData.size();
+// 
+// 		msg->SetMessageData((void*)stringData.c_str(), dataLength);
+// 		g_gameSession->SendMsg(msg, TODO);
+// 	}
 }
 
-void CommandAddConnection(const ConsoleCommandArgs& ca) {
+void CommandHostSession(const ConsoleCommandArgs& ca) {
+	g_gameSession->m_me->m_connectionIndex = 0;
+	g_gameSession->m_hostConnection = g_gameSession->m_me;
+	g_gameSession->Listen(true);
+
+	DevConsole::ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Hosting session\n");
+}
+
+
+void CommandForceTest(const ConsoleCommandArgs&) {
+	g_gameSession->ForceTestAll();
+}
+
+
+void CommandJoinSession(const ConsoleCommandArgs& ca) {
 
 	std::string ip = ca.m_argsList[1];
 	short port = (short)atoi(ca.m_argsList[2].c_str());
@@ -147,15 +167,18 @@ void CommandAddConnection(const ConsoleCommandArgs& ca) {
 	NetAddress netAddr;
 	memcpy(&netAddr.m_addr, ip.c_str(), ip.size());
 	netAddr.m_port = port;
-	g_gameSession->AddConnection(netAddr);
+	NetConnection* newConn = g_gameSession->AddConnection(netAddr, true);
+
+	NetMessage* msg = new NetMessage(NetMessage::GetNetMessageDefinitionByName("joinrequest")->m_id);
+	msg->SetMessageData("CHRISTIAN WALKER", sizeof("CHRISTIAN WALKER"));
+	g_gameSession->SendMsg(msg, newConn);
 }
 
 void CommandCreateSession(const ConsoleCommandArgs& args) {
 	short port = (short)atoi(args.m_argsList[1].c_str());
-	g_gameSession = NetSystem::GetInstance()->CreateSession();
+	g_gameSession = NetSystem::GetInstance()->CreateSession(port);
 
-	DevConsole* devC = DevConsole::GetInstance();
-	devC->ConsolePrintf("%s %i", RGBA(0, 255, 0, 255), "Session created a on port", port);
+	DevConsole::ConsolePrintf("%s %i", RGBA(0, 255, 0, 255), "Session created a on port", port);
 
 	g_gameSession->Listen(true);
 	g_gameSession->Host(port);
@@ -228,8 +251,11 @@ DevConsole::DevConsole(void)
 	RegisterFunction(std::string("quit"), CommandQuit);
 	RegisterFunction(std::string("ping"), CommandPing);
 	RegisterFunction(std::string("createsession"), CommandCreateSession);
-	RegisterFunction(std::string("add_connection"), CommandAddConnection);
+	RegisterFunction(std::string("host_session"), CommandHostSession);
+	RegisterFunction(std::string("join_session"), CommandJoinSession);
+	RegisterFunction(std::string("force_test"), CommandForceTest);
 	RegisterFunction(std::string("test_send"), CommandTestSend);
+
 
 	//ExecuteConsoleString(std::string("help"));
 	//ConsolePrintf("%s %d + %d = %d", RGBA(100,0,255,255),"Consoleprintf", 1, 2, 3);
