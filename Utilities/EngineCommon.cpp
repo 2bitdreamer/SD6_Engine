@@ -668,10 +668,17 @@ void FireEvent(const std::string& eventName, NamedProperties& args /*= NamedProp
 	eventSys.FireEvent(eventName, args);
 }
 
+void FireEvent(const std::string& eventName)
+{
+	NamedProperties np;
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.FireEvent(eventName, np);
+}
+
 void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
 {
 	EventSystem& eventSys = EventSystem::GetInstance();
-	eventSys.RegisterEvent(eventName, callbackFunc);
+	eventSys.RegisterEventCallback(eventName, callbackFunc);
 }
 
 void UnregisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
@@ -679,6 +686,7 @@ void UnregisterEventCallback(const std::string& eventName, EventCallback* callba
 	EventSystem& eventSys = EventSystem::GetInstance();
 	eventSys.UnregisterEvent(eventName, callbackFunc);
 }
+
 
 bool LoadFileToExistingTextBuffer(std::string& filePath, char* &out_textBuffer, size_t bufferSizeLimit)
 {
@@ -743,10 +751,48 @@ void GetFilesList(const std::string& dir, std::vector<std::string>& foundFilesOu
 	}
 }
 
-void GetFilesRecursively(const std::string& dir, std::vector<std::string>& foundFilesOut) {
+
+void FireEventForEachFileFound(const std::string& eventToFire, const std::string& baseFolder, const std::string& filePattern, bool recurseSubfolders) {
+	std::vector<std::string> foundFilesOut;
+	EnumerateFiles(baseFolder, filePattern, foundFilesOut, recurseSubfolders);
+
+	for (std::string file : foundFilesOut) {
+		NamedProperties fileEvent;
+		std::vector<std::string> splitAtDot = SplitString(file, ".");
+		std::vector<std::string> splitAtFwdSlash = SplitString(file, "/");
+
+		if (splitAtDot.size() == 2) {
+			fileEvent.Set("FileExtension", splitAtDot[1]);
+
+			std::string fileNameWithExt = splitAtFwdSlash[splitAtFwdSlash.size() - 1];
+			fileEvent.Set("FileName", fileNameWithExt);
+
+			std::string beforePeriod = fileNameWithExt;
+			beforePeriod = beforePeriod.substr(0, beforePeriod.find_last_of("."));
+
+			fileEvent.Set("FileNameWithoutExtension", beforePeriod);
+			fileEvent.Set("FileRelativePath", file);
+
+			char full[_MAX_PATH];
+
+			_fullpath(full, file.c_str(), _MAX_PATH);
+
+			std::string fullPath = std::string(full);
+			StringReplaceAll(fullPath, "\\", "/");
+			fileEvent.Set("FileAbsolutePath", fullPath);
+
+		}
+
+		FireEvent(eventToFire, fileEvent);
+	}
+
+}
+
+void EnumerateFiles(const std::string& dir, const std::string& filePattern, std::vector<std::string>& foundFilesOut, bool recurseFiles/*=true*/) {
 	int error = 0;
 	struct _finddata_t fileInfo;
-	std::string searchPattern = dir + "/*";
+
+	std::string searchPattern = dir + "/" + filePattern;
 
 	intptr_t searchHandle = _findfirst(searchPattern.c_str(), &fileInfo);
 	while (searchHandle != 1 && !error) {
@@ -756,8 +802,10 @@ void GetFilesRecursively(const std::string& dir, std::vector<std::string>& found
 			//ignore special cases
 		}
 		else if (isADirectory) {
-			std::string recursePath = dir + "/" + fileInfo.name;
-			GetFilesRecursively(recursePath, foundFilesOut);
+			if (recurseFiles) {
+				std::string recursePath = dir + "/" + fileInfo.name;
+				EnumerateFiles(recursePath, filePattern, foundFilesOut, recurseFiles);
+			}
 		}
 		else 
 			foundFilesOut.push_back(dir + "/" + fileInfo.name);

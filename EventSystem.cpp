@@ -32,26 +32,38 @@ void EventSystem::DestroyInstance()
 
 int EventSystem::FireEvent(const std::string& eventName, NamedProperties& args)
 {
-	auto found = m_eventSubscriptions.find(eventName);
-	if (found == m_eventSubscriptions.end())
-		return 0;
+	int totalFound = 0;
 
-	SubscriberList subscribers = found->second;
-	for (EventCallback* callback : subscribers.m_subscriberCallbacks) {
-		callback(args);
+	auto found = m_eventSubscriptionsStandalone.find(eventName);
+	if (found != m_eventSubscriptionsStandalone.end()) {
+		SubscriptionList subscribers = found->second;
+		for (EventCallback* callback : subscribers.m_subscriberCallbacks) {
+			callback(args);
+		}
 	}
 
-	return subscribers.m_subscriberCallbacks.size();
+	totalFound += m_eventSubscriptionsStandalone.size();
+
+	auto found2 = m_eventSubscriptionObj.find(eventName);
+	if (found2 != m_eventSubscriptionObj.end()) {
+		ObjSubscriptionList subscriptionsForEvent = found2->second;
+		for (SubscriptionBase* subscription : subscriptionsForEvent.m_subscriberCallbacks) {
+			subscription->ExecuteCallback(args);
+		}
+		totalFound += subscriptionsForEvent.m_subscriberCallbacks.size();
+	}
+
+	return totalFound;
 }
 
-void EventSystem::RegisterEvent(const std::string& eventName, EventCallback* callbackFunc)
+void EventSystem::RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
 {
-	SubscriberList& subList = m_eventSubscriptions[eventName];
+	SubscriptionList& subList = m_eventSubscriptionsStandalone[eventName];
 	subList.m_subscriberCallbacks.push_back(callbackFunc);
 }
 
 void EventSystem::UnregisterEvent(const std::string& eventName, EventCallback* callbackFunc) {
-	SubscriberList& subList = m_eventSubscriptions.find(eventName)->second;
+	SubscriptionList& subList = m_eventSubscriptionsStandalone.find(eventName)->second;
 
 	std::vector<EventCallback*>& subscriberCallbacks = subList.m_subscriberCallbacks;
 	subscriberCallbacks.erase(std::remove(subscriberCallbacks.begin(), subscriberCallbacks.end(), callbackFunc), subscriberCallbacks.end());

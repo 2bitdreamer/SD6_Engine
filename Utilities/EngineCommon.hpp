@@ -29,6 +29,7 @@
 
 #include <winsock2.h>
 #include "../NamedProperties.hpp"
+#include "../Assert.hpp"
 struct addrinfo;
 #define nothrow void
 class NetAddress;
@@ -51,6 +52,42 @@ static RngT g_rng;
 //static RngT g_rng((unsigned int)0);
 
 //----------------------------------------------------------------------------------------------
+
+
+template<typename T_ObjType, typename T_MethodPtrType>
+void RegisterEventSubscriber(const std::string& eventName, T_ObjType& obj, T_MethodPtrType method) {
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.RegisterEventSubscription(eventName, obj, method);
+}
+
+template <typename T_ObjType, typename T_MethodPtrType>
+void  UnregisterObjMethodForEvent(const std::string& eventName, T_ObjType& object, T_MethodPtrType method) {
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.UnregisterEventSubscription(eventName, object, method);
+}
+
+template <typename T_ObjType>
+void  UnregisterEventForObject(const std::string& eventName, T_ObjType& object) {
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.UnregisterEventForObject(eventName, object);
+}
+
+template <typename T_ObjType>
+void UnregisterObjectFromAllEvents(T_ObjType& object) {
+	EventSystem& eventSys = EventSystem::GetInstance();
+	eventSys.UnregisterObjectFromAllEvents(object);
+}
+
+class Object {
+public:
+	virtual ~Object() {
+		UnregisterObjectFromAllEvents(this);
+	}
+
+	Object() {
+
+	}
+};
 
 
 struct KeyState {
@@ -150,6 +187,8 @@ void DebuggerPrintf( const char* messageFormat, ... );
 size_t GetFileLength(const std::string& filePath);
 size_t GetFileLength(FILE* openFile);
 void GetFilesList(const std::string& dir, std::vector<std::string>& foundFilesOut);
+void FireEventForEachFileFound(const std::string& eventToFire, const std::string& baseFolder, const std::string& filePattern, bool recurseSubfolders);
+void EnumerateFiles(const std::string& dir, const std::string& filePattern, std::vector<std::string>& foundFilesOut, bool recurseFiles/*=true*/);
 void FindAllFilesOfType(const std::string& directory, const std::string& searchPattern, std::vector<std::string>& out_filesFound);
 unsigned char StringToUnsignedChar(const std::string& c);
 RGBA ExtractRGBA(const std::string& attribute);
@@ -160,7 +199,7 @@ std::string Vec3ToString(const Vec3& pos);
 
 std::string Vec2iToString(const Vec2i& pos);
 int Distance(int x1, int x2, int y1, int y2);
-void GetFilesRecursively(const std::string& dir, std::vector<std::string>& foundFilesOut);
+void GetFilesRecursively(const std::string& dir, const std::string& filePattern, std::vector<std::string>& foundFilesOut);
 void GenerateFiles(int numFiles, size_t fileSize, const std::string& basePath);
 size_t HashBytes(const std::vector<unsigned char>& data);
 bool LoadFileToNewBinaryBuffer(const std::string& filePath, unsigned char* &out_binaryBuffer, size_t& out_bufferSize);
@@ -174,7 +213,9 @@ bool FlushByteBufferToDisk(const std::string& filePath, const unsigned char* byt
 bool FlushByteVectorToDisk(const std::string& filePath, const std::vector< unsigned char >& byteVector);
 bool FlushStringToDisk(const std::string& filePath, const std::string& stringToWrite);
 
-void FireEvent(const std::string& eventName, NamedProperties& args = NamedProperties());
+void FireEvent(const std::string& eventName, NamedProperties& args);
+void FireEvent(const std::string& eventName);
+
 void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
 void UnregisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
 
