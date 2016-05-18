@@ -2,6 +2,7 @@
 #include "NetPacket.hpp"
 #include "PacketQueue.hpp"
 #include "UDPSocket.hpp"
+#include "NetworkingCommon.hpp"
 
 void SocketThread::CreateAndBindSocket()
 {
@@ -23,7 +24,6 @@ void SocketThread::CreateAndBindSocket()
 	int status = bind(sock, (sockaddr*)&addr, sizeof(addr));
 	if (status == SOCKET_ERROR) {
 		FATAL_ERROR("Failed to bind address");
-		closesocket(sock);
 		return;
 	}
 
@@ -86,9 +86,6 @@ void SocketThread::ProcessOutgoing()
 			0,
 			(sockaddr*)&sockstorage,
 			addrlen);
-
-		if (sent == SOCKET_ERROR)
-			int err = WSAGetLastError();
 		
 		FATAL_ASSERT(sent != SOCKET_ERROR);
 

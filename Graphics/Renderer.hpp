@@ -145,6 +145,7 @@ public:
 	void PushMatrix();
 
 	void RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath = "");
+	void RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath = "");
 	void RotateMatrix(float angle, float x, float y, float z);
 	void RotateMatrix(float angle, const Vec3& axis);
 

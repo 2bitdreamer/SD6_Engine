@@ -1,6 +1,7 @@
 #include "EventSystem.hpp"
 #include "NamedProperties.hpp"
 #include <algorithm>
+#include "Utilities\DevConsole.hpp"
 
 EventSystem* EventSystem::s_theEventSystem;
 
@@ -30,15 +31,18 @@ void EventSystem::DestroyInstance()
 	s_theEventSystem = nullptr;
 }
 
-int EventSystem::FireEvent(const std::string& eventName, NamedProperties& args)
+int EventSystem::FireEvent(const std::string& eventName, NamedProperties& args, bool isFromConsole/*=false*/)
 {
+
 	int totalFound = 0;
 
 	auto found = m_eventSubscriptionsStandalone.find(eventName);
 	if (found != m_eventSubscriptionsStandalone.end()) {
 		SubscriptionList subscribers = found->second;
-		for (EventCallback* callback : subscribers.m_subscriberCallbacks) {
-			callback(args);
+		for (CallInfo callback : subscribers.m_subscriberCallbacks) {
+			if (callback.m_useConsole || !isFromConsole) {
+				callback.m_callback(args);
+			}
 		}
 	}
 
@@ -48,7 +52,9 @@ int EventSystem::FireEvent(const std::string& eventName, NamedProperties& args)
 	if (found2 != m_eventSubscriptionObj.end()) {
 		ObjSubscriptionList subscriptionsForEvent = found2->second;
 		for (SubscriptionBase* subscription : subscriptionsForEvent.m_subscriberCallbacks) {
-			subscription->ExecuteCallback(args);
+			if (subscription->m_useConsole || !isFromConsole) {
+				subscription->ExecuteCallback(args);
+			}
 		}
 		totalFound += subscriptionsForEvent.m_subscriberCallbacks.size();
 	}
@@ -56,15 +62,30 @@ int EventSystem::FireEvent(const std::string& eventName, NamedProperties& args)
 	return totalFound;
 }
 
-void EventSystem::RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc)
+void EventSystem::RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc, bool console/*=true*/)
 {
+	//DevConsole::GetInstance()->RegisterFunction(eventName, callbackFunc);
+
+	CallInfo ci;
+	ci.m_callback = callbackFunc;
+	ci.m_useConsole = console;
+
 	SubscriptionList& subList = m_eventSubscriptionsStandalone[eventName];
-	subList.m_subscriberCallbacks.push_back(callbackFunc);
+	subList.m_subscriberCallbacks.push_back(ci);
 }
 
 void EventSystem::UnregisterEvent(const std::string& eventName, EventCallback* callbackFunc) {
 	SubscriptionList& subList = m_eventSubscriptionsStandalone.find(eventName)->second;
 
-	std::vector<EventCallback*>& subscriberCallbacks = subList.m_subscriberCallbacks;
-	subscriberCallbacks.erase(std::remove(subscriberCallbacks.begin(), subscriberCallbacks.end(), callbackFunc), subscriberCallbacks.end());
+	std::vector<CallInfo>& subscriberCallbacks = subList.m_subscriberCallbacks;
+
+	for (auto it = subscriberCallbacks.begin(); it != subscriberCallbacks.end(); ) {
+		CallInfo thisInfo = *it;
+		if (thisInfo.m_callback == callbackFunc) {
+			it = subscriberCallbacks.erase(it);
+		}
+		else {
+			++it;
+		}
+	}
 }

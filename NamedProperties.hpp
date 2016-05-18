@@ -6,6 +6,7 @@
 class TypedPropertyBase {
 public:
 	virtual bool IsOfType(const type_info& compareType) = 0;
+	virtual TypedPropertyBase* Clone() = 0;
 };
 
 enum PropertyGetResult {
@@ -35,9 +36,12 @@ public:
 
 	template<typename T_PropertyType>
 	PropertyGetResult Get(const std::string propertyName, T_PropertyType& out_propertyValue) const;
+	NamedProperties(const NamedProperties& np);
+
 
 private:
 	std::map<std::string, TypedPropertyBase*> m_properties;
+
 };
 
 
@@ -46,6 +50,11 @@ class TypedProperty : public TypedPropertyBase {
 public:
 
 	TypedProperty(const T_PropertyType& propertyValue);
+	virtual TypedPropertyBase* Clone() {
+		TypedProperty<T_PropertyType>* clone = new TypedProperty<T_PropertyType>(m_propertyValue);
+		clone->m_propertyValue = m_propertyValue;
+		return clone;
+	}
 
 	virtual bool IsOfType(const type_info& compareType) {
 		const type_info& myType = typeid(m_propertyValue);

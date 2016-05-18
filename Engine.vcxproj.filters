@@ -188,6 +188,21 @@
     <ClCompile Include="EventSystem.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="NetworkingCommon.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyFrameAnimation.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyframeSequence.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetBase.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="UISystem.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\EulerAngles.hpp">
@@ -362,6 +377,19 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="EventSystem.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkingCommon.hpp" />
+    <ClInclude Include="KeyframeSequence.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyFrameAnimation.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetBase.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="UISystem.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>

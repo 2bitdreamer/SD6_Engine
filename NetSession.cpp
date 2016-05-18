@@ -33,6 +33,7 @@ void NetSession::Shutdown()
 bool NetSession::Host(short port)
 {
 		return true;
+		(void)port;
 }
 
 void NetSession::Listen(bool listening)
@@ -62,8 +63,7 @@ bool NetSession::ValidatePacket(NetPacket* pack)
 	size_t packetLen = pack->GetLength();
 
 	if (packetLen < 3) {
-		DevConsole* devConsole = DevConsole::GetInstance();
-		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet length does not include header");
+		DevConsole::ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet length does not include header");
 		return false;
 	}
 
@@ -86,8 +86,7 @@ bool NetSession::ValidatePacket(NetPacket* pack)
 	}
 
 	if ((totalMessagesLength + 4) != (packetLen)) {
-		DevConsole* devConsole = DevConsole::GetInstance();
-		devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Message data size not equal to size claimed");
+		DevConsole::ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Message data size not equal to size claimed");
 		return false;
 	}
 
@@ -239,8 +238,7 @@ void NetSession::Tick() {
 
 			bool packetValid = ValidatePacket(pack);
 			if (!packetValid) {
-				DevConsole* devConsole = DevConsole::GetInstance();
-				devConsole->ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet did not validate");
+				DevConsole::ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Packet did not validate");
 				delete pack;
 			}
 			else {

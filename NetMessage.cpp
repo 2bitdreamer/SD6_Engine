@@ -84,6 +84,7 @@ void NetMessage::RegisterMessageDefinition(uint8_t id, NetMessageDefinition def)
 // HIGH LEVEL VIEW OF OUR GOAL
 void NetJoin(NetAddress* addr)
 {
+	(void)addr;
 // 	NetSession* sp = new NetSession();
 // 	sp->Start();
 // 

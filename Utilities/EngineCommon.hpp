@@ -22,17 +22,9 @@
 #include "Engine/Utilities/Win32Wrapper.hpp"
 #include <time.h>
 #include "../Math/Vertex.hpp"
-
-#ifdef _WINSOCKAPI_
-#undef _WINSOCKAPI_
-#endif
-
-#include <winsock2.h>
 #include "../NamedProperties.hpp"
 #include "../Assert.hpp"
-struct addrinfo;
 #define nothrow void
-class NetAddress;
 
 typedef void (EventCallback)(NamedProperties& args);
 
@@ -80,15 +72,9 @@ void UnregisterObjectFromAllEvents(T_ObjType& object) {
 
 class Object {
 public:
-	virtual ~Object() {
-		UnregisterObjectFromAllEvents(this);
-	}
-
-	Object() {
-
-	}
+	virtual ~Object();
+	Object();
 };
-
 
 struct KeyState {
 	bool m_isPressed;
@@ -150,30 +136,6 @@ struct TextLine {
 	float m_textSize;
 };
 
-// TYPES ////////////////////////////////////////////////////////////////////
-typedef bool(*address_work_cb)(addrinfo*, void *user_arg);
-
-void NetAddrFromSockAddr(NetAddress *na, sockaddr *addr);
-void SockAddrFromNetAddr(sockaddr *addr, size_t *addrlen, NetAddress const &net_addr);
-
-void* GetInAddr(sockaddr const *sa);
-
-void* GetInAddr(sockaddr *sa, uint16_t *port, size_t *size_out);
-// FUNCTION PROTOTYPES //////////////////////////////////////////////////////
-addrinfo* AllocAddressesForHost(char const *host,
-	char const *service,
-	int family,
-	int socktype,
-	bool binding);
-
-void FreeAddresses(addrinfo* addresses);
-
-uint16_t GetAddressPort(sockaddr const *addr);
-size_t GetAddressName(char *buffer, size_t const buffer_size, sockaddr const *sa);
-
-void ForEachAddress(addrinfo *addresses, address_work_cb cb, void *user_arg);
-
-
 
 const std::string Stringf( const char* format, ... );
 
@@ -213,8 +175,8 @@ bool FlushByteBufferToDisk(const std::string& filePath, const unsigned char* byt
 bool FlushByteVectorToDisk(const std::string& filePath, const std::vector< unsigned char >& byteVector);
 bool FlushStringToDisk(const std::string& filePath, const std::string& stringToWrite);
 
-void FireEvent(const std::string& eventName, NamedProperties& args);
-void FireEvent(const std::string& eventName);
+void FireEvent(const std::string& eventName, NamedProperties& arg, bool fromConsole = false);
+void FireEvent(const std::string& eventName, bool fromConsole = false);
 
 void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
 void UnregisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
@@ -267,13 +229,48 @@ bool IsWhitespace(char c);
 char* Trim(char *s);
 
 // COMMENT: Code duplication  (Nothing to do with this project. For a specific class
-//Christian will look at it later.)
+//I will look at it later.)
 inline std::string GetDiffuseTexturePathForModelName(const std::string& modelToLoad) {
 	std::string dataPath = "Data/Models/" + modelToLoad + "/" + modelToLoad;
 	std::string texturePath = dataPath;
 	texturePath += "_Diffuse";
 	texturePath += ".png";
 	return texturePath;
+}
+
+
+template <typename T>
+inline T Interpolate(const T& start, const T& end, float fractionComplete) {
+	return (T)(start * (1.f - fractionComplete)) + (end * fractionComplete);
+}
+
+
+inline int Interpolate(const int& start, const int& end, float fractionComplete) {
+	int numSlots = 1 + end - start;
+	float parametricPerSlot = 1.f / (float)numSlots;
+	int lerpedSlot = (int)floorf(fractionComplete / parametricPerSlot);
+	return start + lerpedSlot;
+}
+
+inline unsigned char Interpolate(const unsigned char& start, const unsigned char& end, float fractionComplete) {
+	return (unsigned char)Interpolate((int)start, (int)end, fractionComplete);
+}
+
+inline RGBA Interpolate(const RGBA& start, const RGBA& end, float fractionComplete) {
+	RGBA interpRGBA;
+	interpRGBA.r() = Interpolate(start.r(), end.r(), fractionComplete);
+	interpRGBA.g() = Interpolate(start.g(), end.g(), fractionComplete);
+	interpRGBA.b() = Interpolate(start.b(), end.b(), fractionComplete);
+	interpRGBA.a() = Interpolate(start.a(), end.a(), fractionComplete);
+	return interpRGBA;
+}
+
+template <typename T>
+inline T Clamp(T x, T low, T high)
+
+{
+	return x < low ? low : (x > high ? high : x);
+
 }
 
 inline std::string GetNormalsTexturePathForModelName(const std::string& modelToLoad) {

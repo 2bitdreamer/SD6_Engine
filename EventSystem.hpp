@@ -4,10 +4,16 @@
 #include "Utilities\EngineCommon.hpp"
 #include <map>
 
+struct CallInfo {
+	bool m_useConsole;
+	EventCallback* m_callback;
+};
+
 struct SubscriptionBase {
 	//virtual bool IsOfType(const type_info& compareType) = 0;
 	virtual void ExecuteCallback(NamedProperties& args) = 0;
 	virtual ~SubscriptionBase() { }
+	bool m_useConsole;
 };
 
 template<typename T_ObjectType>
@@ -40,7 +46,7 @@ void TypedObjectSubscription<T_ObjectType>::ExecuteCallback(NamedProperties& arg
 }
 
 struct SubscriptionList {
-	std::vector<EventCallback*> m_subscriberCallbacks;
+	std::vector<CallInfo> m_subscriberCallbacks;
 };
 
 struct ObjSubscriptionList {
@@ -59,17 +65,18 @@ public:
 	static void CreateInstance();
 	static EventSystem& GetInstance();
 	static void DestroyInstance();
-	int FireEvent(const std::string& eventName, NamedProperties& args);
-	void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc);
+	int FireEvent(const std::string& eventName, NamedProperties& args, bool isFromConsole=false);
+	void RegisterEventCallback(const std::string& eventName, EventCallback* callbackFunc, bool console=true);
 	void UnregisterEvent(const std::string& eventName, EventCallback* callbackFunc);
 	int FireEvent(const std::string& name);
 
 	template <typename T_OBJ_TYPE, typename T_OBJMETHOD_PTR_TYPE>
-	void RegisterEventSubscription(const std::string& eventName, T_OBJ_TYPE& obj, T_OBJMETHOD_PTR_TYPE method) {
+	void RegisterEventSubscription(const std::string& eventName, T_OBJ_TYPE& obj, T_OBJMETHOD_PTR_TYPE method, bool useConsole = false) {
 		auto found = m_eventSubscriptionObj.find(eventName);
 		ObjSubscriptionList& foundSubscription = m_eventSubscriptionObj[eventName];
 		SubscriptionBase* subscription = new TypedObjectSubscription<T_OBJ_TYPE>(obj, method);
 		foundSubscription.m_subscriberCallbacks.push_back(subscription);
+		subscription->m_useConsole = useConsole;
 	}
 
 	template <typename T_OBJ_TYPE, typename T_OBJMETHOD_PTR_TYPE>

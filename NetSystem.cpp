@@ -6,6 +6,7 @@
 #include "Utilities\DevConsole.hpp"
 #include "NetConnection.hpp"
 #include <functional>
+#include "NetworkingCommon.hpp"
 
 NetSystem* NetSystem::GetInstance()
 {
@@ -88,7 +89,6 @@ bool NetSystem::Init()
 	}
 	else {
 		FATAL_ERROR("Could not setup WSA System");
-		return false;
 	}
 
 	//Create netmessage definitions here
@@ -162,6 +162,7 @@ void PingCallback(net_sender_t &from, NetMessage* msg) {
 
 	std::string test = std::string((char*)msg->GetBuffer());
 	DevConsole::ConsolePrintf("%s %s", RGBA(0, 0, 255, 255), "Message Data: ", test.c_str());
+	(void)from;
 }
 
 void PongCallback(net_sender_t &from, NetMessage* msg) {
@@ -169,21 +170,28 @@ void PongCallback(net_sender_t &from, NetMessage* msg) {
 
 	std::string test = std::string((char*)msg->GetBuffer());
 	DevConsole::ConsolePrintf("%s %s", RGBA(0, 0, 255, 255), "Message Data: ", test.c_str());
+	(void)from;
 }
 
 
 void HeartbeatCallback(net_sender_t& from, NetMessage* msg) {
 	DevConsole::ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received heartbeat!");
+	(void)msg;
+	(void)from;
 }
 
 
 void InOrderTestCallback(net_sender_t& from, NetMessage* msg) {
-
+	(void)msg;
+	(void)from;
 }
 
 void JoinAcceptCallback(net_sender_t& from, NetMessage* msg) {
 	DevConsole::ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received join accept!");
-	
+
+	(void)from;
+
+
 	size_t byteAt = 0;
 	unsigned char* messageData = msg->GetBuffer();
 
@@ -196,17 +204,20 @@ void JoinAcceptCallback(net_sender_t& from, NetMessage* msg) {
 	NetSystem* system = NetSystem::GetInstance();
 	NetSession* gameSession = system->m_networkSessions[0];
 
+	(void)maxConnections;
+	(void)msg;
+
 	gameSession->m_me->m_connectionIndex = connID;
 }
 
 void ForceTestCallback(net_sender_t& from, NetMessage* msg) {
-
+	(void)from;
+	(void)msg;
 }
 
 void JoinRequestCallback(net_sender_t& from, NetMessage* msg)
 {
-	DevConsole* devC = DevConsole::GetInstance();
-	devC->ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received join request");
+	DevConsole::ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received join request");
 
 	NetSystem* system = NetSystem::GetInstance();
 	NetSession* gameSession = system->m_networkSessions[0];
@@ -222,8 +233,8 @@ void JoinRequestCallback(net_sender_t& from, NetMessage* msg)
 	int sizeofID = -1;
 
 	if (!gameSession->m_listening)
-		errorCode = 0;
-	else if (gameSession->m_connections.size() >= gameSession->m_maxConnections)
+		errorCode = (uint8_t)0;
+	else if (gameSession->m_connections.size() >= (size_t)gameSession->m_maxConnections)
 		errorCode = 1;
 	else {
 		unsigned char* messageData = msg->GetBuffer();
@@ -258,7 +269,7 @@ void JoinRequestCallback(net_sender_t& from, NetMessage* msg)
 		uint8_t firstValidConnectionIndex = 0;
 
 		std::vector<NetConnection*>& connections = gameSession->m_connections;
-		uint8_t maxConnections = gameSession->m_maxConnections;
+		uint8_t maxConnections = (uint8_t)gameSession->m_maxConnections;
 
 		for (uint8_t index1 = 0; index1 < maxConnections; index1++) {
 			bool foundAny = false;
@@ -351,8 +362,7 @@ void JoinDenyCallback(net_sender_t& from, NetMessage* msg)
 }
 
 void AckCallback(net_sender_t& from, NetMessage* msg) {
-	DevConsole* devC = DevConsole::GetInstance();
-	devC->ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received ack");
+	DevConsole::ConsolePrintf("%s", RGBA(0, 0, 255, 255), "Received ack");
 
 
 	NetConnection* connection = from.connection;
@@ -380,6 +390,8 @@ void AckCallback(net_sender_t& from, NetMessage* msg) {
 }
 
 void LeaveCallback(net_sender_t& from, NetMessage* msg) {
+	(void)msg;
+
 	NetSystem* system = NetSystem::GetInstance();
 	NetSession* gameSession = system->m_networkSessions[0];
 

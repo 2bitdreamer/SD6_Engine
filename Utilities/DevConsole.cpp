@@ -15,6 +15,7 @@
 #include "../NetAddress.hpp"
 #include "../NetSession.hpp"
 #include "../NetMessage.hpp"
+#include "../NetworkingCommon.hpp"
 
 static std::deque<ConsoleLine> g_consoleLines;
 static std::map<std::string, ConsoleFunction*> g_messageDefinitions;
@@ -130,6 +131,7 @@ void CommandQuit(const ConsoleCommandArgs&) {
 }
 
 void CommandTestSend(const ConsoleCommandArgs& args) {
+	(void)args;
 // 	int numMessages = atoi(args.m_argsList[1].c_str());
 // 
 // 	for (int index = 0; index < numMessages; index++) {
@@ -151,6 +153,7 @@ void CommandHostSession(const ConsoleCommandArgs& ca) {
 	g_gameSession->Listen(true);
 
 	DevConsole::ConsolePrintf("%s", RGBA(255, 0, 0, 255), "Hosting session\n");
+	(void)ca;
 }
 
 
@@ -183,30 +186,6 @@ void CommandCreateSession(const ConsoleCommandArgs& args) {
 	g_gameSession->Listen(true);
 	g_gameSession->Host(port);
 
-}
-
-size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable)
-{
-	(void)family;
-	addrinfo* addresses = AllocAddressesForHost(hostname.c_str(), std::to_string(port).c_str(), AF_INET, SOCK_DGRAM, bindable);
-	
-	size_t c = 0;
-	addrinfo* addr = addresses;
-
-	while ((c < outbuf_len) && (addr != nullptr)) {
-
-		if (addr->ai_family == AF_INET) {
-			NetAddress na;
-			NetAddrFromSockAddr(&na, addr->ai_addr);
-			outbuf[c] = na;
-			++c;
-		}
-
-		addr = addr->ai_next;
-	}
-
-	FreeAddresses(addresses);
-	return c;
 }
 
 void CommandPing(const ConsoleCommandArgs& args) {
@@ -246,15 +225,15 @@ DevConsole::DevConsole(void)
 	m_lineHeight = 20.f;
 	m_frameCounter = 0;
 
-	RegisterFunction(std::string("clear"), CommandClear);
-	RegisterFunction(std::string("help"), CommandHelp);
-	RegisterFunction(std::string("quit"), CommandQuit);
-	RegisterFunction(std::string("ping"), CommandPing);
-	RegisterFunction(std::string("createsession"), CommandCreateSession);
-	RegisterFunction(std::string("host_session"), CommandHostSession);
-	RegisterFunction(std::string("join_session"), CommandJoinSession);
-	RegisterFunction(std::string("force_test"), CommandForceTest);
-	RegisterFunction(std::string("test_send"), CommandTestSend);
+// 	RegisterFunction(std::string("clear"), CommandClear);
+// 	RegisterFunction(std::string("help"), CommandHelp);
+// 	RegisterFunction(std::string("quit"), CommandQuit);
+// 	RegisterFunction(std::string("ping"), CommandPing);
+// 	RegisterFunction(std::string("createsession"), CommandCreateSession);
+// 	RegisterFunction(std::string("host_session"), CommandHostSession);
+// 	RegisterFunction(std::string("join_session"), CommandJoinSession);
+// 	RegisterFunction(std::string("force_test"), CommandForceTest);
+// 	RegisterFunction(std::string("test_send"), CommandTestSend);
 
 
 	//ExecuteConsoleString(std::string("help"));
@@ -350,15 +329,23 @@ void DevConsole::RegisterFunction(const std::string& funcName, ConsoleFunction* 
 }
 
 void DevConsole::ExecuteConsoleString(std::string& console) {
-	ConsoleCommandArgs cargs(console);
+	NamedProperties np;
 
-	if (g_messageDefinitions.find(cargs.m_argsList[0]) == g_messageDefinitions.end())
-	{
-		return;
+	ConsoleCommandArgs cargs(console);
+	 
+	for (unsigned int index = 1; index < cargs.m_argsList.size(); index++) {
+		np.Set(std::to_string(index), cargs.m_argsList[index]);
 	}
 
-	std::string command = cargs.m_argsList[0]; 
-	g_messageDefinitions[command](cargs);
+	FireEvent(cargs.m_argsList[0], np, true);
+
+// 	if (g_messageDefinitions.find(cargs.m_argsList[0]) == g_messageDefinitions.end())
+// 	{
+// 		return;
+// 	}
+// 
+// 	std::string command = cargs.m_argsList[0]; 
+// 	g_messageDefinitions[command](cargs);
 
 	//std::vector<std::pair<RGBA, int>> commandLogColorPair;
 	//std::string consoleLineChar = "> ";

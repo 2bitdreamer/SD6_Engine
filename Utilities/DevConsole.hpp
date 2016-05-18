@@ -9,6 +9,8 @@
 #include "Engine/Utilities/EngineCommon.hpp"
 #include <fstream>
 
+class NetAddress;
+
 class XMLFontRenderer;
 struct HtmlLogManager;
 class XMLFontRenderer;
@@ -63,7 +65,6 @@ struct ConsoleLine {
 
 void CommandTestSend(const ConsoleCommandArgs&);
 void CommandForceTest(const ConsoleCommandArgs&);
-size_t NetAddressForHost(NetAddress* outbuf, size_t outbuf_len, int family, const std::string& hostname, uint16_t port, bool bindable);
 
 
 

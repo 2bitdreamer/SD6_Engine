@@ -2,7 +2,7 @@
 #include <sstream>
 #include <windows.h>
 
-void FatalError(const std::string& errorText, const std::string& file, const std::string& func, int lineNum) {
+__declspec(noreturn) void FatalError(const std::string& errorText, const std::string& file, const std::string& func, int lineNum) {
 #ifdef WIN32
 	std::stringstream errorMessage;
 	errorMessage << errorText << " in file " << file << "in function " << func << "line number " << lineNum;

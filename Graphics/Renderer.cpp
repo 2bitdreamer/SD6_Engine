@@ -113,9 +113,7 @@ void Renderer::PushMatrix()
 	m_matrixStack.push_back(m_matrixStack.back());
 }
 
-
-
-void Renderer::RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath /*= ""*/) {
+void Renderer::RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath /*= ""*/) {
 	Material testMat;
 	testMat.AddTexture(texturePath, "u_diffuseMap");
 	int shaderID = testMat.GetShaderProgramID();
@@ -145,11 +143,15 @@ void Renderer::RenderPrimitives(int primitiveType, const std::vector<Vertex>& ve
 	glVertexAttribPointer(colorLocation, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)&vertexData[0].m_color);
 	glVertexAttribPointer(texCoordsLocation, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)&vertexData[0].m_texCoords);
 
-	glDrawArrays(primitiveType, 0, vertexData.size());
+	glDrawArrays(primitiveType, 0, numVertices);
 
 	glDisableVertexAttribArray(positionLocation);
 	glDisableVertexAttribArray(colorLocation);
 	glDisableVertexAttribArray(texCoordsLocation);
+}
+
+void Renderer::RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath /*= ""*/) {
+	RenderPrimitives(primitiveType, &vertexData[0], vertexData.size(), texturePath);
 }
 
 void Renderer::RenderTexturedAABB(const Vec2& mins, const Vec2& maxs, int colorTextureID, int depthTextureID, int shaderID) {

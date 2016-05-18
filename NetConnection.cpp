@@ -76,8 +76,8 @@ void NetConnection::CleanupTrackers()
 		ReliableTracker *tracker = m_trackers.back();
 
 		if (tracker != nullptr) {
-			float age = GetAbsoluteTimeSeconds() - tracker->m_timeCreated;
-			if (age >= cTracker_MaxAge) {
+			double age = GetAbsoluteTimeSeconds() - tracker->m_timeCreated;
+			if (((float)age) >= cTracker_MaxAge) {
 				m_trackers.pop_back();
 				delete tracker;
 			}
@@ -150,8 +150,8 @@ void NetConnection::SendPacket()
 		}
 		else {
 			// Resend if it has passed resend age
-			float age = GetAbsoluteTimeSeconds() - msg->m_lastSentTime;
-			if (age >= cNetMessage_ResendTime) {
+			double age = GetAbsoluteTimeSeconds() - msg->m_lastSentTime;
+			if (((float)age) >= cNetMessage_ResendTime) {
 				if (packet->AddMessage(msg)) {
 					m_sentReliables.pop_back();
 					reliablesSentThisFrame.push_back(msg);
@@ -275,6 +275,7 @@ bool NetConnection::CanUseReliableID(uint16_t reliable_id)
 void NetConnection::ProcessPacket(NetPacket* packet)
 {
 	m_timeLastReceivedPacket = GetAbsoluteTimeSeconds();
+	(void)packet;
 }
 
 bool NetConnection::IsConnected()
@@ -285,11 +286,13 @@ bool NetConnection::IsConnected()
 void NetConnection::IncrementAck(uint16_t& ack)
 {
 	++m_nextAck;
+	(void)ack;
 }
 
 void NetConnection::IncrementReliableID(uint16_t nextRelID)
 {
 	++m_nextReliableID;
+	(void)nextRelID;
 }
 
 void NetConnection::SendAllReceivedAcks(NetPacket * packet)
@@ -297,7 +300,7 @@ void NetConnection::SendAllReceivedAcks(NetPacket * packet)
 	if (m_receivedAcks.empty())
 		return;
 
-	unsigned char receivedAckCount = min(0xff, m_receivedAcks.size());
+	unsigned char receivedAckCount = (unsigned char)min(0xff, m_receivedAcks.size());
 	NetMessage* ackMessage = new NetMessage();
 	ackMessage->m_messageDefinition = NetMessage::GetNetMessageDefinitionByName("ack");
 	ackMessage->Write<unsigned char>(receivedAckCount);

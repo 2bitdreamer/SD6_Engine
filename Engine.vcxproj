@@ -184,6 +184,8 @@
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="EventSystem.cpp" />
+    <ClCompile Include="KeyFrameAnimation.cpp" />
+    <ClCompile Include="KeyframeSequence.cpp" />
     <ClCompile Include="NamedProperties.cpp" />
     <ClCompile Include="NetConnection.cpp" />
     <ClCompile Include="GenerateFilesJob.cpp" />
@@ -211,6 +213,7 @@
     <ClCompile Include="NetPacket.cpp" />
     <ClCompile Include="NetSession.cpp" />
     <ClCompile Include="NetSystem.cpp" />
+    <ClCompile Include="NetworkingCommon.cpp" />
     <ClCompile Include="PacketQueue.cpp" />
     <ClCompile Include="ProfileSection.cpp" />
     <ClCompile Include="ReverseBufferJob.cpp" />
@@ -222,6 +225,7 @@
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
     <ClCompile Include="UDPSocket.cpp" />
+    <ClCompile Include="UISystem.cpp" />
     <ClCompile Include="Utilities\BinaryBufferBuilder.cpp" />
     <ClCompile Include="Utilities\BinaryBufferParser.cpp" />
     <ClCompile Include="Utilities\BinaryFileParser.cpp" />
@@ -231,6 +235,7 @@
     <ClCompile Include="Utilities\Time.cpp" />
     <ClCompile Include="Utilities\Win32Wrapper.cpp" />
     <ClCompile Include="Utilities\XMLFontRenderer.cpp" />
+    <ClCompile Include="WidgetBase.cpp" />
     <ClCompile Include="XMLUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +245,8 @@
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Command.hpp" />
     <ClInclude Include="EventSystem.hpp" />
+    <ClInclude Include="KeyFrameAnimation.hpp" />
+    <ClInclude Include="KeyframeSequence.hpp" />
     <ClInclude Include="NamedProperties.hpp" />
     <ClInclude Include="NetConnection.hpp" />
     <ClInclude Include="GenerateFilesJob.hpp" />
@@ -270,6 +277,7 @@
     <ClInclude Include="NetPacket.hpp" />
     <ClInclude Include="NetSession.hpp" />
     <ClInclude Include="NetSystem.hpp" />
+    <ClInclude Include="NetworkingCommon.hpp" />
     <ClInclude Include="PacketQueue.hpp" />
     <ClInclude Include="ProfileSection.hpp" />
     <ClInclude Include="ReverseBufferJob.hpp" />
@@ -280,6 +288,7 @@
     <ClInclude Include="Thread.hpp" />
     <ClInclude Include="TriangleMesh.hpp" />
     <ClInclude Include="UDPSocket.hpp" />
+    <ClInclude Include="UISystem.hpp" />
     <ClInclude Include="Utilities\BinaryBufferBuilder.hpp" />
     <ClInclude Include="Utilities\BinaryBufferParser.hpp" />
     <ClInclude Include="Utilities\BinaryFileParser.hpp" />
@@ -291,6 +300,7 @@
     <ClInclude Include="Utilities\Time.hpp" />
     <ClInclude Include="Utilities\Win32Wrapper.hpp" />
     <ClInclude Include="Utilities\XMLFontRenderer.hpp" />
+    <ClInclude Include="WidgetBase.hpp" />
     <ClInclude Include="XMLUtils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

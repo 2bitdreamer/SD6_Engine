@@ -11,7 +11,7 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 
 	size_t headerSize = msg.ComputeHeaderSize();
 
-	Write<uint16_t>((uint16_t)msgLen + headerSize); 
+	Write<uint16_t>((uint16_t)(msgLen + headerSize)); 
 	Write<uint8_t>((uint8_t)(msg.m_messageDefinition->m_id));
 
 	if (msg.IsReliable()) {
@@ -27,7 +27,7 @@ bool NetPacket::AddMessage(const NetMessage& msg)
 void NetPacket::CreateHeader()
 {
 	unsigned short packetAckID = 0xffff;
-	unsigned char connectionID = 0xffff;
+	unsigned char connectionID = (unsigned char)0xff;
 
 // 	memcpy(m_buffer, &connectionID, sizeof(unsigned char));
 // 	memcpy(m_buffer + sizeof(unsigned char), &packetAckID, sizeof(unsigned short));
