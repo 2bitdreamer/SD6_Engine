@@ -1,6 +1,7 @@
 #pragma once
 #include "KeyFrameAnimation.hpp"
 #include <string>
+class WidgetStyle;
 
 enum UIState {
 	UI_STATE_DEFAULT,
@@ -11,18 +12,36 @@ enum UIState {
 	NUM_UI_STATES
 };
 
+enum MouseEventType {
+	LEFT_BUTTON_DOWN,
+	LEFT_BUTTON_UP,
+	RIGHT_BUTTON_DOWN,
+	RIGHT_BUTTON_UP,
+	MOVED
+};
+
+struct MouseEvent {
+	Vec2 m_cursorPos;
+	MouseEventType m_mouseEventType;
+};
+
 class WidgetBase
 {
 public:
 	WidgetBase();
 	~WidgetBase();
 
-	std::string GetNameForState(UIState state);
+	static std::string GetNameForState(UIState state);
+	static UIState GetStateForName(const std::string& name);
+
+
 	virtual void ApplyWidgetProperties(const NamedProperties& widgetDescriptor);
+	virtual void OnMouseEvent(MouseEvent me);
+
 	Vec2 GetWorldPosition();
 	float GetOpacity();
 	template<typename T>
-	PropertyGetResult GetProperty(const std::string& name, T& out_currentValue) {
+	PropertyGetResult GetPropertyForCurrentState(const std::string& name, T& out_currentValue) {
 
 		KeyFrameAnimation<T> asAnimation;
 		T asStaticValue;
@@ -47,6 +66,11 @@ public:
 		return resultAnim;
 	}
 
+	template<typename T>
+	PropertyGetResult SetPropertyForCurrentState(const std::string& name, T newValue) {
+		m_stateProperties[m_currentState].Get(name, newValue);
+	}
+
 	template <typename T>
 	void UpdateProperty(const std::string& name, float deltaTimeSeconds) {
 		KeyFrameAnimation<T> asKFA;
@@ -58,19 +82,30 @@ public:
 
 	template<typename T>
 	void SetPropertyForState(const std::string& propertyName, UIState state, T propertyValue) {
-		m_stateProperties[state].Set(propertyName, propertyValue);
+		if (state == UI_STATE_ALL) {
+			for (UIState st = UI_STATE_DEFAULT; st < NUM_UI_STATES; st = (UIState)(st + 1)) {
+				m_stateProperties[st].Set(propertyName, propertyValue);
+			}
+		}
+		else {
+			m_stateProperties[state].Set(propertyName, propertyValue);
+		}
 	}
 
 	virtual void Update(double deltaTimeSeconds);
-	void RenderOutline(const Vec2& worldPos, const Vec2& size);
-	void RenderBackground(const Vec2& worldPos, const Vec2& size);
 	virtual void Render();
 
+	void RenderOutline(const Vec2& worldPos, const Vec2& size);
+	void RenderBackground(const Vec2& worldPos, const Vec2& size);
+
+	static WidgetBase* Create();
+
+	void ApplyStyle(WidgetStyle* baseStyle);
 public:
 	NamedProperties m_stateProperties[ NUM_UI_STATES ];
 	UIState m_currentState;
 	WidgetBase* m_parentWidget;
 private:
-	void CopyPropertyToWidget(const std::string& propertyName, const NamedProperties& widgetDescriptor);
+	void CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP);
 };
 

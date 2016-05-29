@@ -180,10 +180,12 @@
   <ItemGroup>
     <ClCompile Include="Assert.cpp" />
     <ClCompile Include="BitArray.cpp" />
+    <ClCompile Include="ButtonWidget.cpp" />
     <ClCompile Include="CalculateOrderJob.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="EventSystem.cpp" />
+    <ClCompile Include="GroupWidget.cpp" />
     <ClCompile Include="KeyFrameAnimation.cpp" />
     <ClCompile Include="KeyframeSequence.cpp" />
     <ClCompile Include="NamedProperties.cpp" />
@@ -236,15 +238,18 @@
     <ClCompile Include="Utilities\Win32Wrapper.cpp" />
     <ClCompile Include="Utilities\XMLFontRenderer.cpp" />
     <ClCompile Include="WidgetBase.cpp" />
+    <ClCompile Include="WidgetStyle.cpp" />
     <ClCompile Include="XMLUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assert.hpp" />
     <ClInclude Include="BitArray.hpp" />
+    <ClInclude Include="ButtonWidget.hpp" />
     <ClInclude Include="CalculateOrderJob.hpp" />
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Command.hpp" />
     <ClInclude Include="EventSystem.hpp" />
+    <ClInclude Include="GroupWidget.hpp" />
     <ClInclude Include="KeyFrameAnimation.hpp" />
     <ClInclude Include="KeyframeSequence.hpp" />
     <ClInclude Include="NamedProperties.hpp" />
@@ -301,6 +306,7 @@
     <ClInclude Include="Utilities\Win32Wrapper.hpp" />
     <ClInclude Include="Utilities\XMLFontRenderer.hpp" />
     <ClInclude Include="WidgetBase.hpp" />
+    <ClInclude Include="WidgetStyle.hpp" />
     <ClInclude Include="XMLUtils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

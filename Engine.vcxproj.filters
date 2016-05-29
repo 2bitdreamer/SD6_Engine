@@ -203,6 +203,15 @@
     <ClCompile Include="UISystem.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="ButtonWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="WidgetStyle.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\EulerAngles.hpp">
@@ -390,6 +399,15 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="UISystem.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="WidgetStyle.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>

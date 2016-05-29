@@ -265,6 +265,20 @@ inline RGBA Interpolate(const RGBA& start, const RGBA& end, float fractionComple
 	return interpRGBA;
 }
 
+inline std::string Interpolate(const std::string& start, const std::string& end, float fractionComplete) {
+	size_t startSize = start.size();
+	size_t endSize = end.size();
+
+	float fractionStart = 1.f - fractionComplete;
+	size_t startIndex = startSize * fractionStart;
+	size_t endIndex = endSize * fractionComplete;
+
+	std::string startString = start.substr(0, startIndex);
+	std::string endString = end.substr(0, endIndex);
+
+	return (startString + endString);
+}
+
 template <typename T>
 inline T Clamp(T x, T low, T high)
 

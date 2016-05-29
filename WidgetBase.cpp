@@ -1,7 +1,11 @@
 #include "WidgetBase.hpp"
 #include "Graphics\Renderer.hpp"
+#include "UISystem.hpp"
+#include "WidgetStyle.hpp"
 
-
+namespace {
+	bool _ = UISystem::RegisterWidget("WidgetBase", WidgetBase::Create);
+};
 
 WidgetBase::WidgetBase() :
 	m_parentWidget(nullptr),
@@ -39,19 +43,43 @@ std::string WidgetBase::GetNameForState(UIState state) {
 	}
 }
 
-void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor) {
+UIState WidgetBase::GetStateForName(const std::string& name)
+{
+	if (name == "Disabled")
+		return UI_STATE_DISABLED;
+	if (name == "Pressed")
+		return UI_STATE_PRESSED;
+	if (name == "Highlighted")
+		return UI_STATE_HIGHLIGHTED;
+	if (name == "All")
+		return UI_STATE_ALL;
+	return UI_STATE_DEFAULT;
+}
 
-	CopyPropertyToWidget( "offset", widgetDescriptor );
-	CopyPropertyToWidget("size", widgetDescriptor );
-	CopyPropertyToWidget("color", widgetDescriptor );
-	CopyPropertyToWidget("opacity", widgetDescriptor );
+void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor)
+{
+	for (UIState state = UI_STATE_DEFAULT; state < NUM_UI_STATES; state = (UIState)(state + 1)) {
+		std::string stateName = GetNameForState((UIState)state);
+		NamedProperties currentNP;
+		PropertyGetResult currentGetResult = widgetDescriptor.Get(stateName, currentNP);
+
+		if (currentGetResult == RESULT_SUCCESS) {
+			CopyStatePropertyToWidget(state, currentNP);
+		}
+
+	}
+}
+
+
+void WidgetBase::OnMouseEvent(MouseEvent me) {
+
 
 }
 
 Vec2 WidgetBase::GetWorldPosition()
 {
 	Vec2 offset;
-	GetProperty("offset", offset);
+	GetPropertyForCurrentState("offset", offset);
 	if (!m_parentWidget)
 		return offset;
 	else
@@ -60,7 +88,7 @@ Vec2 WidgetBase::GetWorldPosition()
 
 float WidgetBase::GetOpacity() {
 	float opacity;
-	GetProperty("opacity", opacity);
+	GetPropertyForCurrentState("opacity", opacity);
 	if (!m_parentWidget)
 		return opacity;
 	else
@@ -85,7 +113,7 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 	RGBA edgeColor;
 	Vertex baseOutlineVertex;
 	Vertex outlineVertices[4];
-	GetProperty("edge color", edgeColor);
+	GetPropertyForCurrentState("edge color", edgeColor);
 	edgeColor.a() *= opacity;
 	baseOutlineVertex.m_color = edgeColor;
 
@@ -116,7 +144,7 @@ void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
 	float opacity = GetOpacity();
 
 	RGBA backgroundColor;
-	GetProperty("color", backgroundColor);
+	GetPropertyForCurrentState("color", backgroundColor);
 	backgroundColor.a() *= opacity;
 
 	baseVertex.m_color = backgroundColor;
@@ -140,25 +168,38 @@ void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
 	renderer.RenderPrimitives(GL_QUADS, verticesToRender, 4);
 }
 
+WidgetBase* WidgetBase::Create()
+{
+	return new WidgetBase();
+}
+
+void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
+{
+	auto properties = baseStyle->GetProperties();
+
+	for (auto it = properties.begin(); it != properties.end(); ++it) {
+		State st = it->first;
+		const NamedProperties& np = it->second;
+
+		if (st.type == STATE_NONE) {
+			CopyStatePropertyToWidget(st.state1, np);
+		}
+	}
+}
+
 void WidgetBase::Render()
 {
 	Vec2 worldPos = GetWorldPosition();
 
 	Vec2 size;
-	GetProperty("size", size);
+	GetPropertyForCurrentState("size", size);
 
 	RenderBackground(worldPos, size);
 	RenderOutline(worldPos, size);
 }
 
-void WidgetBase::CopyPropertyToWidget(const std::string& propertyName, const NamedProperties& widgetDescriptor)
+void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP)
 {
-	for (int state = 0; state < NUM_UI_STATES; state++) {
-		std::string stateName = GetNameForState((UIState)state);
-		NamedProperties currentNP;
-		PropertyGetResult currentGetResult = widgetDescriptor.Get(stateName, currentNP);
-
-		if (currentGetResult == RESULT_SUCCESS) {
 			Vec2 offset;
 			Vec2 size;
 			RGBA color;
@@ -181,6 +222,4 @@ void WidgetBase::CopyPropertyToWidget(const std::string& propertyName, const Nam
 
 			if (opr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("opacity", opacity);
-		}
-	}
 }

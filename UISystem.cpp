@@ -2,52 +2,71 @@
 #include "NamedProperties.hpp"
 #include "WidgetBase.hpp"
 #include "Assert.hpp"
+#include "GroupWidget.hpp"
 #include "Engine/Libraries/tinyxml.h"
+#include <algorithm>
+#include "WidgetStyle.hpp"
 
 UISystem::UISystem()
 {
+	
+}
 
-	TiXmlDocument doc("Data/default.xml");
+void UISystem::ReadStyleFile(const std::string& filePath) {
+	TiXmlDocument doc(filePath.c_str());
 	doc.LoadFile();
-
 	TiXmlHandle docHandle(&doc);
 
-	//Get the style name and insert it into the namedproperties
+	//Get the style name and insert it into the named properties
 	TiXmlHandle styleNameHandle = docHandle.FirstChild("Style");
 	TiXmlElement* styleNameElement = styleNameHandle.ToElement();
 	const std::string styleName = styleNameElement->Attribute("name");
 	FATAL_ASSERT(styleName != "");
 
-	NamedProperties styleProperties;
-	styleProperties.Set("name", styleName);
-
-	//Iterate over the types of widgets
 	for (const TiXmlNode* widgetDefinition = styleNameElement->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
 	{
-		WidgetBase* widget = nullptr;
 		const char* widgetName = widgetDefinition->ToElement()->Value();
-
-		if (strcmp(widgetName, "BaseWidget") == 0) {
-			widget = new WidgetBase();
-		}
-
-		//Iterate over each state definition for the widget type
-		for (const TiXmlNode* stateDefinition = widgetDefinition->FirstChild(); stateDefinition; stateDefinition = stateDefinition->NextSibling())
-		{
-			std::vector<const TiXmlNode*> widgetAttributes = ExtractWidgetAttributesFromStateDefinition(stateDefinition);
-
-		}
+		s_styles[styleName][widgetName] = new WidgetStyle(widgetDefinition);
 	}
-
-
-	
-
-
 }
 
-RGBA UISystem::ExtractRGBAFromXML(const TiXmlElement* rgba) {
+WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const std::string& styleName) {
+	WidgetStyle* baseStyle = s_styles[styleName][widgetType];
+	WidgetBase* wid;
 
+	wid->ApplyStyle(baseStyle);
+	return wid;
 }
+
+void UISystem::ReadWidgetFile(const std::string& filePath) {
+	TiXmlDocument doc(filePath.c_str());
+	doc.LoadFile();
+	TiXmlHandle docHandle(&doc);
+
+	for (const TiXmlNode* widgetDefinition = docHandle.ToElement()->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
+	{
+
+		CreateWidgetInParent(m_rootWidget, widgetDefinition);
+
+		//#TODO: Handle GroupWidgets and such
+		//ReadWidgetFile delegates itself to a function that takes a GroupWidget(parent) and a TiXMLNode* 
+	}
+}
+
+void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
+	const char* widgetName = data->ToElement()->Value();
+	const char* styleName = data->ToElement()->Attribute("style");
+
+	if (!styleName)
+		styleName = "Default";
+
+	WidgetBase* wb = CreateStyledWidget(widgetName, styleName);
+	WidgetStyle style = WidgetStyle(data);
+	wb->ApplyStyle(&style);
+
+	parent->m_children.push_back(wb);
+}
+
 
 NamedProperties UISystem::ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition) {
 	NamedProperties widgetAttributes;
@@ -67,34 +86,60 @@ NamedProperties UISystem::ExtractWidgetAttributesFromStateDefinition(const TiXml
 		const char* B = bgcolor->Attribute("B");
 		const char* A = bgcolor->Attribute("A");
 
+		if (!A)
+			A = "255";
 
+		char Rc = (char)atoi(R);
+		char Gc = (char)atoi(G);
+		char Bc = (char)atoi(B);
+		char Ac = (char)atoi(A);
+
+		widgetAttributes.Set("color", RGBA(Rc, Gc, Bc, Ac));
+	}
+
+	if (size) {
+		const char* sizeX = size->Attribute("X");
+		const char* sizeY = size->Attribute("Y");
+
+		float X = atof(sizeX);
+		float Y = atof(sizeY);
+
+		widgetAttributes.Set("size", Vec2(X, Y));
+	}
+
+	if (offset) {
+		const char* offsetX = offset->Attribute("X");
+		const char* offsetY = offset->Attribute("Y");
+
+		float X = atof(offsetX);
+		float Y = atof(offsetY);
+
+		widgetAttributes.Set("offset", Vec2(X, Y));
+
+	}
+
+	if (opacity) {
+		
 
 	}
 
 	return widgetAttributes;
 }
 
-void UISystem::CreateStyle(const NamedProperties& styleDescriptor) {
-	std::string styleName;
-	PropertyGetResult nameGetResult = styleDescriptor.Get<std::string>("name", styleName);
-	FATAL_ASSERT(nameGetResult == RESULT_SUCCESS);
-	m_styles[styleName] = styleDescriptor;
+void UISystem::Render() {
+	m_rootWidget->Render();
 }
 
-void UISystem::Render() {
-	for (auto it = m_widgets.begin(); it != m_widgets.end(); ++it) {
-		WidgetBase* widget = *it;
-		widget->Render();
-	}
+void UISystem::OnMouseEvent(MouseEvent me) {
+
 }
 
 void UISystem::Update(double deltaTimeSeconds)
 {
-	for (auto it = m_widgets.begin(); it != m_widgets.end(); ++it) {
-		WidgetBase* widget = *it;
-		widget->Update(deltaTimeSeconds);
-	}
+	m_rootWidget->Update(deltaTimeSeconds);
 }
+
+
 
 WidgetBase* UISystem::CreateWidget(const NamedProperties& widgetDescriptor) {
 
@@ -110,6 +155,14 @@ WidgetBase* UISystem::CreateWidget(const NamedProperties& widgetDescriptor) {
 
 	return widget;
 }
+
+bool UISystem::RegisterWidget(const std::string& name, std::function<WidgetBase*(const TiXmlNode*)> creationFunc)
+{
+	return s_widgetFactory.insert(std::make_pair(name, creationFunc)).second;
+}
+
+
+
 
 
 UISystem::~UISystem()
