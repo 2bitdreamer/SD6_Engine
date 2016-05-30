@@ -4,7 +4,7 @@
 #include <vector>
 #include "NamedProperties.hpp"
 #include "Libraries\tinyxml.h"
-#include "WidgetBase.hpp"s
+#include "WidgetBase.hpp"
 #include <functional>
 class GroupWidget;
 class WidgetStyle;

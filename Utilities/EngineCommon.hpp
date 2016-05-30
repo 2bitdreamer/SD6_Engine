@@ -281,7 +281,6 @@ inline std::string Interpolate(const std::string& start, const std::string& end,
 
 template <typename T>
 inline T Clamp(T x, T low, T high)
-
 {
 	return x < low ? low : (x > high ? high : x);
 

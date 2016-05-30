@@ -2,9 +2,10 @@
 #include "Graphics\Renderer.hpp"
 #include "UISystem.hpp"
 #include "WidgetStyle.hpp"
+#include <functional>
 
 namespace {
-	bool _ = UISystem::RegisterWidget("WidgetBase", WidgetBase::Create);
+	bool _ = UISystem::RegisterWidget("WidgetBase", std::bind(&WidgetBase::Create));
 };
 
 WidgetBase::WidgetBase() :

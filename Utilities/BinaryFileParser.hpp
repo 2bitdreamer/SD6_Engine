@@ -1,4 +1,4 @@
-g#pragma once
+#pragma once
 #include "Engine\Utilities\BinaryBufferParser.hpp"
 class BinaryFileParser :
 	public BinaryBufferParser

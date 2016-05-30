@@ -14,6 +14,10 @@ struct State {
 	StateType type;
 	UIState state1;
 	UIState state2;
+
+	inline bool operator>(const State& rhs) const {
+		return rhs.type > type || (rhs.type == type && rhs.state1 > state1) || (rhs.type == type && rhs.state1 == state1 && rhs.state2 > state2);
+	}
 };
 
 class WidgetStyle {
@@ -42,7 +46,8 @@ public:
 	/* Getters */
 	bool Applies(const std::string& widgetName) const;
 
-	std::map<WidgetStyle::State, NamedProperties, std::greater<WidgetStyle::State>> GetProperties() const { return m_properties; }
+	~WidgetStyle();
+	std::map<State, NamedProperties, std::greater<State>> GetProperties() const { return m_properties; }
 	// ...
 
 private:
