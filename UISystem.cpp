@@ -7,9 +7,27 @@
 #include <algorithm>
 #include "WidgetStyle.hpp"
 
-UISystem::UISystem()
+std::map<std::string, std::map<std::string, WidgetStyle*>> UISystem::s_styles;
+std::map<std::string, std::function<WidgetBase*(const TiXmlNode*)> > UISystem::s_widgetFactory;
+
+UISystem::UISystem() :
+	m_rootWidget(new GroupWidget())
 {
-	
+	std::vector<std::string> out_styles;
+	FindAllFilesOfType("Data/Styles/", "*", out_styles);
+
+	for (auto it = out_styles.begin(); it != out_styles.end(); ++it) {
+		std::string filePath = *it;
+		ReadStyleFile(filePath);
+	}
+
+	std::vector<std::string> out_widgets;
+	FindAllFilesOfType("Data/Widgets/", "*", out_widgets);
+
+	for (auto it = out_styles.begin(); it != out_styles.end(); ++it) {
+		std::string filePath = *it;
+		ReadWidgetFile(filePath);
+	}
 }
 
 void UISystem::ReadStyleFile(const std::string& filePath) {
@@ -68,63 +86,7 @@ void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) 
 }
 
 
-NamedProperties UISystem::ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition) {
-	NamedProperties widgetAttributes;
 
-
-	const TiXmlElement* bgcolor = stateDefinition->FirstChild("BackgroundColor")->ToElement();
-	const TiXmlElement* bordersize = stateDefinition->FirstChild("BorderSize")->ToElement();
-	const TiXmlElement* borderColor = stateDefinition->FirstChild("BorderColor")->ToElement();
-	const TiXmlElement* size = stateDefinition->FirstChild("Size")->ToElement();
-	const TiXmlElement* offset = stateDefinition->FirstChild("Offset")->ToElement();
-	const TiXmlElement* opacity = stateDefinition->FirstChild("Opacity")->ToElement();
-
-
-	if (bgcolor) {
-		const char* R = bgcolor->Attribute("R");
-		const char* G = bgcolor->Attribute("G");
-		const char* B = bgcolor->Attribute("B");
-		const char* A = bgcolor->Attribute("A");
-
-		if (!A)
-			A = "255";
-
-		char Rc = (char)atoi(R);
-		char Gc = (char)atoi(G);
-		char Bc = (char)atoi(B);
-		char Ac = (char)atoi(A);
-
-		widgetAttributes.Set("color", RGBA(Rc, Gc, Bc, Ac));
-	}
-
-	if (size) {
-		const char* sizeX = size->Attribute("X");
-		const char* sizeY = size->Attribute("Y");
-
-		float X = atof(sizeX);
-		float Y = atof(sizeY);
-
-		widgetAttributes.Set("size", Vec2(X, Y));
-	}
-
-	if (offset) {
-		const char* offsetX = offset->Attribute("X");
-		const char* offsetY = offset->Attribute("Y");
-
-		float X = atof(offsetX);
-		float Y = atof(offsetY);
-
-		widgetAttributes.Set("offset", Vec2(X, Y));
-
-	}
-
-	if (opacity) {
-		
-
-	}
-
-	return widgetAttributes;
-}
 
 void UISystem::Render() {
 	m_rootWidget->Render();

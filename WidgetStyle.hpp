@@ -29,6 +29,7 @@ public:
 	/* Dispatches to [C++ Definition Methods] */
 	WidgetStyle(const TiXmlNode *);
 
+	NamedProperties ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition);
 	/* 7.b */
 	/* C++ Definition Methods */
 	/* 7.c */
@@ -57,6 +58,8 @@ private:
 	General properties come before specific properties
 	*/
 	std::map<State, NamedProperties, std::greater<State>> m_properties;
+
+	void ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const TiXmlNode* animationDefinition);
 
 };
 

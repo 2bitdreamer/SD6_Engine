@@ -16,7 +16,6 @@ public:
 	void ReadStyleFile(const std::string& filePath);
 	~UISystem();
 
-	static NamedProperties ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition);
 	void Render();
 	void OnMouseEvent(MouseEvent me);
 	void Update(double deltaTimeSeconds);
@@ -27,7 +26,6 @@ public:
 	static void CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data);
 public:
 	GroupWidget* m_rootWidget;
-
 	//StyleName, WidgetType for the strings
 	static std::map<std::string, std::map<std::string, WidgetStyle*>> s_styles;
 	static std::map<std::string, std::function<WidgetBase*(const TiXmlNode*)> > s_widgetFactory;

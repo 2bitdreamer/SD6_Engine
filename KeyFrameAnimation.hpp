@@ -18,7 +18,7 @@ public:
 		m_durationSeconds(0.f),
 		m_currentSeconds(0.f)
 	{
-
+		m_keyFrames.m_wrapBehavior = B_CLAMP;
 	}
 
 	~KeyFrameAnimation() {
@@ -43,6 +43,10 @@ public:
 
 	float GetCurrentSeconds() const {
 		return m_currentSeconds;
+	}
+
+	void SetDuration(float seconds) {
+		m_durationSeconds = seconds;
 	}
 
 	void AddAnimationFrameAtParameter(const T& value, float param) {

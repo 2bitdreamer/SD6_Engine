@@ -81,14 +81,20 @@ public:
 	}
 
 	template<typename T>
-	void SetPropertyForState(const std::string& propertyName, UIState state, T propertyValue) {
+	void SetPropertyForState(const std::string& propertyName, UIState state, T propertyValue, float animationTime=0.f) {
+		KeyFrameAnimation<T> asKFA;
+
 		if (state == UI_STATE_ALL) {
 			for (UIState st = UI_STATE_DEFAULT; st < NUM_UI_STATES; st = (UIState)(st + 1)) {
-				m_stateProperties[st].Set(propertyName, propertyValue);
+				m_stateProperties[st].Get<KeyFrameAnimation<T>>(propertyName, asKFA);
+				asKFA.AddAnimationFrameAtParameter(propertyValue, animationTime);
+				m_stateProperties[st].Set(propertyName, asKFA);
 			}
 		}
 		else {
-			m_stateProperties[state].Set(propertyName, propertyValue);
+			m_stateProperties[state].Get<KeyFrameAnimation<T>>(propertyName, asKFA);
+			asKFA.AddAnimationFrameAtParameter(propertyValue, animationTime);
+			m_stateProperties[state].Set(propertyName, asKFA);
 		}
 	}
 

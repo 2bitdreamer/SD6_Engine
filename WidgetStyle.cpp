@@ -6,26 +6,114 @@ WidgetStyle::WidgetStyle()
 {
 }
 
+NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition) {
+	NamedProperties widgetAttributes;
+
+	const char* stateName = stateDefinition->ToElement()->Value();
+	const TiXmlNode* bgcolor = stateDefinition->FirstChild("BackgroundColor");
+
+	const TiXmlNode* bordersize = stateDefinition->FirstChild("BorderSize");
+	const TiXmlNode* borderColor = stateDefinition->FirstChild("BorderColor");
+	const TiXmlNode* size = stateDefinition->FirstChild("Size");
+	const TiXmlNode* offset = stateDefinition->FirstChild("Offset");
+	const TiXmlNode* opacity = stateDefinition->FirstChild("Opacity");
+
+
+	if (bgcolor) {
+		const TiXmlElement* bgColorElement = bgcolor->ToElement();
+		const char* R = bgColorElement->Attribute("R");
+		const char* G = bgColorElement->Attribute("G");
+		const char* B = bgColorElement->Attribute("B");
+		const char* A = bgColorElement->Attribute("A");
+
+		bool isAnim = bgcolor->FirstChild("KeyFrame") != nullptr;
+
+		if (isAnim) {
+			KeyFrameAnimation<RGBA> colorSeq;
+			const char* durationSeconds = bgColorElement->Attribute("duration");
+			colorSeq.SetDuration(atof(durationSeconds));
+
+			for (const TiXmlNode* animationDefinition = bgcolor->FirstChild("KeyFrame"); animationDefinition; animationDefinition = animationDefinition->NextSibling())
+			{
+				ParseColorAnimation(colorSeq, animationDefinition);
+			}
+
+			widgetAttributes.Set("color", colorSeq);
+		}
+		else {
+
+			if (!A)
+				A = "255";
+
+			char Rc = (char)atoi(R);
+			char Gc = (char)atoi(G);
+			char Bc = (char)atoi(B);
+			char Ac = (char)atoi(A);
+
+			KeyFrameAnimation<RGBA> colorSeq;
+			colorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), 0.f);
+			widgetAttributes.Set("color", colorSeq);
+		}
+	}
+
+	if (size) {
+
+		const TiXmlElement* sizeElement = size->ToElement();
+
+		const char* sizeX = sizeElement->Attribute("X");
+		const char* sizeY = sizeElement->Attribute("Y");
+
+		float X = atof(sizeX);
+		float Y = atof(sizeY);
+
+		KeyFrameAnimation<Vec2> sizeSeq;
+		sizeSeq.AddAnimationFrameAtParameter(Vec2(X, Y), 0.f);
+
+		widgetAttributes.Set("size", sizeSeq);
+	}
+
+	if (offset) {
+		const TiXmlElement* offsetElement = offset->ToElement();
+		const char* offsetX = offsetElement->Attribute("X");
+		const char* offsetY = offsetElement->Attribute("Y");
+
+		float X = atof(offsetX);
+		float Y = atof(offsetY);
+
+		KeyFrameAnimation<Vec2> offsetSeq;
+		offsetSeq.AddAnimationFrameAtParameter(Vec2(X, Y), 0.f);
+
+		widgetAttributes.Set("offset", offsetSeq);
+
+	}
+
+	if (opacity) {
+		KeyFrameAnimation <float> opacitySeq;
+		float opacityVal = atof(opacity->ToElement()->Attribute("opacity"));
+		opacitySeq.AddAnimationFrameAtParameter(0.f, opacityVal);
+
+		widgetAttributes.Set("opacity", opacitySeq);
+	}
+
+	return widgetAttributes;
+}
+
 
 WidgetStyle::WidgetStyle(const TiXmlNode* node)
 {
-	//Iterate over the types of widgets
-	for (const TiXmlNode* widgetDefinition = node->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
-	{
-		const char* widgetName = widgetDefinition->ToElement()->Value();
+		const char* widgetName = node->ToElement()->Value();
 
 		//Iterate over each state definition for the widget type
-		for (const TiXmlNode* stateDefinition = widgetDefinition->FirstChild(); stateDefinition; stateDefinition = stateDefinition->NextSibling())
+		for (const TiXmlNode* stateDefinition = node->FirstChild(); node; node = node->NextSibling())
 		{
 			std::string stateName = stateDefinition->ToElement()->Value();
 			UIState state = WidgetBase::GetStateForName(stateName);
-			NamedProperties widgetAttributes = UISystem::ExtractWidgetAttributesFromStateDefinition(stateDefinition);
+			NamedProperties widgetAttributes = ExtractWidgetAttributesFromStateDefinition(stateDefinition);
 			
 			AddTarget(widgetName);
 			AddProperty(state, widgetAttributes);
 		}
 	}
-}
 
 void WidgetStyle::AddTarget(const std::string& widgetName)
 {
@@ -84,4 +172,26 @@ bool WidgetStyle::Applies(const std::string& widgetName) const
 
 WidgetStyle::~WidgetStyle()
 {
+}
+
+void WidgetStyle::ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const TiXmlNode* animationDefinition)
+{
+	{
+		const TiXmlElement* animationElement = animationDefinition->ToElement();
+		const char* R = animationElement->Attribute("R");
+		const char* G = animationElement->Attribute("G");
+		const char* B = animationElement->Attribute("B");
+		const char* A = animationElement->Attribute("A");
+		const char* time = animationElement->Attribute("time");
+
+		char Rc = (char)atoi(R);
+		char Gc = (char)atoi(G);
+		char Bc = (char)atoi(B);
+		char Ac = (char)atoi(A);
+
+		if (!A)
+			A = "255";
+
+		colorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), atof(time));
+	}
 }
