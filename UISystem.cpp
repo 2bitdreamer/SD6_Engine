@@ -13,6 +13,8 @@ std::map<std::string, std::function<WidgetBase*(const TiXmlNode*)> > UISystem::s
 UISystem::UISystem() :
 	m_rootWidget(new GroupWidget())
 {
+	//Read all styles and widgets 
+
 	std::vector<std::string> out_styles;
 	FindAllFilesOfType("Data/Styles/", "*", out_styles);
 
@@ -48,13 +50,6 @@ void UISystem::ReadStyleFile(const std::string& filePath) {
 	}
 }
 
-WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const std::string& styleName) {
-	WidgetStyle* baseStyle = s_styles[styleName][widgetType];
-	WidgetBase* wid;
-
-	wid->ApplyStyle(baseStyle);
-	return wid;
-}
 
 void UISystem::ReadWidgetFile(const std::string& filePath) {
 	TiXmlDocument doc(filePath.c_str());
@@ -71,6 +66,20 @@ void UISystem::ReadWidgetFile(const std::string& filePath) {
 	}
 }
 
+WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const std::string& styleName, const TiXmlNode* data) {
+	WidgetStyle* baseStyle = s_styles[styleName][widgetType];
+	WidgetBase* wid;
+
+	auto result = s_widgetFactory.find(widgetType);
+
+	if (result != s_widgetFactory.end()) {
+		wid = result->second(data);
+	}
+
+	wid->ApplyStyle(baseStyle); //Why did we have this before?
+	return wid;
+}
+
 void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
 	const char* widgetName = data->ToElement()->Value();
 	const char* styleName = data->ToElement()->Attribute("style");
@@ -78,7 +87,8 @@ void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) 
 	if (!styleName)
 		styleName = "Default";
 
-	WidgetBase* wb = CreateStyledWidget(widgetName, styleName);
+	WidgetBase* wb = CreateStyledWidget(widgetName, styleName, data);
+
 	WidgetStyle style = WidgetStyle(data);
 	wb->ApplyStyle(&style);
 
@@ -101,22 +111,6 @@ void UISystem::Update(double deltaTimeSeconds)
 	m_rootWidget->Update(deltaTimeSeconds);
 }
 
-
-
-WidgetBase* UISystem::CreateWidget(const NamedProperties& widgetDescriptor) {
-
-	std::string widgetTypeName;
-	widgetDescriptor.Get("WidgetTypeName", widgetTypeName);
-
-	WidgetBase* widget = nullptr;
-
-	if (widgetTypeName == "WidgetBase")
-	 widget = new WidgetBase(); //#TODO: add actual widget types when i have them
-
-	widget->ApplyWidgetProperties(widgetDescriptor);
-
-	return widget;
-}
 
 bool UISystem::RegisterWidget(const std::string& name, std::function<WidgetBase*(const TiXmlNode*)> creationFunc)
 {
