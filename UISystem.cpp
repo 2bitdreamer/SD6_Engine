@@ -26,7 +26,7 @@ UISystem::UISystem() :
 	std::vector<std::string> out_widgets;
 	FindAllFilesOfType("Data/Widgets/", "*", out_widgets);
 
-	for (auto it = out_styles.begin(); it != out_styles.end(); ++it) {
+	for (auto it = out_widgets.begin(); it != out_widgets.end(); ++it) {
 		std::string filePath = *it;
 		ReadWidgetFile(filePath);
 	}
@@ -56,14 +56,13 @@ void UISystem::ReadWidgetFile(const std::string& filePath) {
 	doc.LoadFile();
 	TiXmlHandle docHandle(&doc);
 
-	for (const TiXmlNode* widgetDefinition = docHandle.ToElement()->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
+	for (TiXmlElement* widgetDefinition = doc.FirstChildElement(); widgetDefinition != NULL; widgetDefinition = widgetDefinition->NextSiblingElement())
 	{
-
 		CreateWidgetInParent(m_rootWidget, widgetDefinition);
-
-		//#TODO: Handle GroupWidgets and such
-		//ReadWidgetFile delegates itself to a function that takes a GroupWidget(parent) and a TiXMLNode* 
 	}
+
+	//#TODO: Handle GroupWidgets and such
+	//ReadWidgetFile delegates itself to a function that takes a GroupWidget(parent) and a TiXMLNode* 
 }
 
 WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const std::string& styleName, const TiXmlNode* data) {
@@ -72,11 +71,10 @@ WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const st
 
 	auto result = s_widgetFactory.find(widgetType);
 
-	if (result != s_widgetFactory.end()) {
-		wid = result->second(data);
-	}
+	FATAL_ASSERT(result != s_widgetFactory.end());
+	wid = result->second(data);
 
-	wid->ApplyStyle(baseStyle); //Why did we have this before?
+	wid->ApplyStyle(baseStyle);
 	return wid;
 }
 

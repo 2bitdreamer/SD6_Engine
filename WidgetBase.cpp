@@ -16,7 +16,7 @@ WidgetBase::WidgetBase() :
 	SetPropertyForState("offset", UI_STATE_ALL, Vec2(0.f, 0.f));
 	SetPropertyForState("size", UI_STATE_ALL, Vec2(100.f, 50.f));
 	SetPropertyForState("edge color", UI_STATE_ALL, RGBA(200, 200, 200, 255));
-	SetPropertyForState("opacity", UI_STATE_ALL, RGBA(10, 10, 10, 255));
+	SetPropertyForState("opacity", UI_STATE_ALL, 1.f);
 	SetPropertyForState("color", UI_STATE_HIGHLIGHTED, RGBA(255, 255, 255, 255));
 }
 
@@ -67,7 +67,6 @@ void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor)
 		if (currentGetResult == RESULT_SUCCESS) {
 			CopyStatePropertyToWidget(state, currentNP);
 		}
-
 	}
 }
 
@@ -201,16 +200,17 @@ void WidgetBase::Render()
 
 void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP)
 {
-			Vec2 offset;
-			Vec2 size;
-			RGBA color;
-			RGBA edgeColor;
-			float opacity;
+			KeyFrameAnimation<Vec2> offset;
+			KeyFrameAnimation<Vec2> size;
+			KeyFrameAnimation<RGBA> color;
+			KeyFrameAnimation<RGBA> edgeColor;
+			KeyFrameAnimation<float> opacity;
 
 			PropertyGetResult ofr = currentNP.Get("offset", offset);
 			PropertyGetResult sr = currentNP.Get("size", size);
 			PropertyGetResult cr = currentNP.Get("color", color);
 			PropertyGetResult opr = currentNP.Get("opacity", opacity);
+			PropertyGetResult ec = currentNP.Get("edge color", edgeColor);
 
 			if (ofr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("offset", offset);
@@ -223,4 +223,7 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 
 			if (opr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("opacity", opacity);
+
+			if (opr == RESULT_SUCCESS)
+				m_stateProperties[state].Set("edge color", edgeColor);
 }
