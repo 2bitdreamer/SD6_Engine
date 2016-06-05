@@ -1,12 +1,13 @@
 #include "ButtonWidget.hpp"
 #include "Utilities\XMLFontRenderer.hpp"
-
-
+#include "UISystem.hpp"
+#include "Libraries\tinyxml.h"
+#include <functional>
 
 ButtonWidget::ButtonWidget() :
 	m_fontRenderer(new XMLFontRenderer())
 {
-	SetPropertyForState("button text", UI_STATE_ALL, "Default");
+	SetPropertyForState("button text", UI_STATE_ALL, std::string("Default"));
 	SetPropertyForState("text scale", UI_STATE_ALL, 1.f);
 	SetPropertyForState("text color", UI_STATE_ALL, RGBA(255, 255, 255, 255));
 	SetPropertyForState("text opacity", UI_STATE_ALL, 1.f);
@@ -17,9 +18,21 @@ ButtonWidget::~ButtonWidget()
 {
 }
 
+WidgetBase* ButtonWidget::Create(const TiXmlNode* data)
+{
+	ButtonWidget* gw = new ButtonWidget();
+	const char* clickEventToFire = data->ToElement()->Attribute("OnClick");
+	gw->SetPropertyForState("click event", UI_STATE_PRESSED, std::string(clickEventToFire));
+	return gw;
+}
+
+
 void ButtonWidget::OnMouseEvent(MouseEvent me)
 {
-
+	m_currentState = UI_STATE_PRESSED;
+	std::string eventToFire;
+	//GetPropertyForCurrentState("click event", eventToFire);
+	FireEvent(eventToFire);
 }
 
 void ButtonWidget::Update(double deltaTimeSeconds)
@@ -55,7 +68,7 @@ Vec2 ButtonWidget::GetCenter(const std::string& text, float cellSize)
 void ButtonWidget::Render()
 {
 	std::string textToDraw;
-	GetPropertyForCurrentState("button text", textToDraw); //SHOULD NOT BE ANIMATED, or modify interpolate to be compatible
+	GetPropertyForCurrentState("button text", textToDraw);
 
 	RGBA textColor;
 	GetPropertyForCurrentState("text color", textColor);

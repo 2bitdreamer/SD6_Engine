@@ -6,9 +6,16 @@
 #include "Engine/Libraries/tinyxml.h"
 #include <algorithm>
 #include "WidgetStyle.hpp"
+#include "ButtonWidget.hpp"
 
 std::map<std::string, std::map<std::string, WidgetStyle*>> UISystem::s_styles;
 std::map<std::string, std::function<WidgetBase*(const TiXmlNode*)> > UISystem::s_widgetFactory;
+
+namespace {
+	bool _1 = UISystem::RegisterWidget("Button", &ButtonWidget::Create);
+	bool _2 = UISystem::RegisterWidget("WidgetBase", std::bind(&WidgetBase::Create));
+	bool _3 = UISystem::RegisterWidget("Group", &GroupWidget::Create);
+};
 
 UISystem::UISystem() :
 	m_rootWidget(new GroupWidget())
@@ -90,6 +97,7 @@ void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) 
 	WidgetStyle style = WidgetStyle(data);
 	wb->ApplyStyle(&style);
 
+	wb->m_parentWidget = parent;
 	parent->m_children.push_back(wb);
 }
 

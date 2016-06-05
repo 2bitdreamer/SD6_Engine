@@ -1,10 +1,6 @@
 #include "GroupWidget.hpp"
 #include "UISystem.hpp"
 
-namespace {
-	bool _ = UISystem::RegisterWidget("GroupWidget", GroupWidget::Create);
-};
-
 GroupWidget::GroupWidget()
 {
 }

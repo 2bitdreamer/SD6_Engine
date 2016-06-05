@@ -2,6 +2,7 @@
 #include <map>
 #include <typeinfo.h>
 #include <string>
+#include "Assert.hpp"
 
 class TypedPropertyBase {
 public:
@@ -36,6 +37,7 @@ public:
 
 	template<typename T_PropertyType>
 	PropertyGetResult Get(const std::string propertyName, T_PropertyType& out_propertyValue) const;
+	template <typename T> T& Get(std::string const & name);
 	NamedProperties(const NamedProperties& np);
 
 
@@ -111,6 +113,28 @@ void NamedProperties::Set(const std::string& propertyName, const T& propertyValu
 
 	TypedPropertyBase* newProperty = new TypedProperty<T>(propertyValue);
 	m_properties[propertyName] = newProperty;
+}
+
+template <typename T_PropertyType>
+T_PropertyType& NamedProperties::Get(std::string const & propertyName) {
+
+	bool error = false;
+	if (m_properties.empty())
+		error = true;
+
+	auto found = m_properties.find(propertyName);
+	if (found == m_properties.end())
+		error = true;
+
+	TypedPropertyBase* baseProperty = found->second;
+	if (!baseProperty->IsOfType(typeid(T_PropertyType)))
+		error = true;
+
+	FATAL_ASSERT(!error);
+
+	TypedProperty<T_PropertyType>* theTypedProperty = reinterpret_cast<TypedProperty<T_PropertyType>*>(baseProperty);
+	T_PropertyType& propertyValue = theTypedProperty->m_propertyValue;
+	return propertyValue;
 }
 
 template<typename T_PropertyType>

@@ -1,6 +1,7 @@
 #pragma once
 #include "WidgetBase.hpp"
 class XMLFontRenderer;
+class TiXmlNode;
 
 class ButtonWidget :
 	public WidgetBase
@@ -9,6 +10,7 @@ public:
 	ButtonWidget();
 	~ButtonWidget();
 
+	static WidgetBase* Create(const TiXmlNode* data);
 	virtual void OnMouseEvent(MouseEvent me);
 	virtual void Update(double deltaTimeSeconds);
 	float GetTextOpacity();

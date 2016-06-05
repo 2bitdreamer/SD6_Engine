@@ -12,11 +12,12 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 	const char* stateName = stateDefinition->ToElement()->Value();
 	const TiXmlNode* bgcolor = stateDefinition->FirstChild("BackgroundColor");
 
-	const TiXmlNode* bordersize = stateDefinition->FirstChild("BorderSize");
+	const TiXmlNode* borderSize = stateDefinition->FirstChild("BorderSize");
 	const TiXmlNode* borderColor = stateDefinition->FirstChild("BorderColor");
 	const TiXmlNode* size = stateDefinition->FirstChild("Size");
 	const TiXmlNode* offset = stateDefinition->FirstChild("Offset");
 	const TiXmlNode* opacity = stateDefinition->FirstChild("Opacity");
+	const TiXmlNode* textColor = stateDefinition->FirstChild("TextColor");
 
 
 	if (bgcolor) {
@@ -31,6 +32,10 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		if (isAnim) {
 			KeyFrameAnimation<RGBA> colorSeq;
 			const char* durationSeconds = bgColorElement->Attribute("duration");
+			const char* isLooping = bgColorElement->Attribute("loop");
+			if (strcmp(isLooping, "true") == 0)
+				colorSeq.SetWrapMode(B_LOOP);
+
 			colorSeq.SetDuration(atof(durationSeconds));
 
 			for (const TiXmlNode* animationDefinition = bgcolor->FirstChild("KeyFrame"); animationDefinition; animationDefinition = animationDefinition->NextSibling())
@@ -89,10 +94,66 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 
 	if (opacity) {
 		KeyFrameAnimation <float> opacitySeq;
-		float opacityVal = atof(opacity->ToElement()->Attribute("opacity"));
+		float opacityVal = atof(opacity->ToElement()->Attribute("value"));
 		opacitySeq.AddAnimationFrameAtParameter(0.f, opacityVal);
 
 		widgetAttributes.Set("opacity", opacitySeq);
+	}
+
+	if (borderSize) {
+		KeyFrameAnimation <float> borderSizeSeq;
+		float borderSizeVal = atof(borderSize->ToElement()->Attribute("value"));
+		borderSizeSeq.AddAnimationFrameAtParameter(0.f, borderSizeVal);
+
+		widgetAttributes.Set("border size", borderSizeSeq);
+	}
+
+	if (borderColor) {
+		KeyFrameAnimation <RGBA> borderColorSeq;
+
+		const TiXmlElement* bgColorElement = borderColor->ToElement();
+		const char* R = bgColorElement->Attribute("R");
+		const char* G = bgColorElement->Attribute("G");
+		const char* B = bgColorElement->Attribute("B");
+		const char* A = bgColorElement->Attribute("A");
+
+		char Rc = (char)atoi(R);
+		char Gc = (char)atoi(G);
+		char Bc = (char)atoi(B);
+		char Ac;
+
+		if (!A)
+			Ac = 255;
+		else
+			Ac = (char)atoi(A);
+
+		borderColorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), 0.f);
+
+		widgetAttributes.Set("border color", borderColorSeq);
+	}
+
+	if (textColor) {
+		KeyFrameAnimation <RGBA> textColorSeq;
+
+		const TiXmlElement* bgColorElement = textColor->ToElement();
+		const char* R = bgColorElement->Attribute("R");
+		const char* G = bgColorElement->Attribute("G");
+		const char* B = bgColorElement->Attribute("B");
+		const char* A = bgColorElement->Attribute("A");
+
+		char Rc = (char)atoi(R);
+		char Gc = (char)atoi(G);
+		char Bc = (char)atoi(B);
+		char Ac;
+
+		if (!A)
+			Ac = 255;
+		else
+			Ac = (char)atoi(A);
+
+		textColorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), 0.f);
+
+		widgetAttributes.Set("text color", textColorSeq);
 	}
 
 	return widgetAttributes;

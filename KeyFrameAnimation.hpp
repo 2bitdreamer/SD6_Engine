@@ -53,6 +53,10 @@ public:
 		m_keyFrames.AddValueAtParameter(value, param);
 	}
 
+	void SetWrapMode(WrapBehavior wb) {
+		m_keyFrames.m_wrapBehavior = wb;
+	}
+
 private:
 	float m_currentSeconds;
 	float m_durationSeconds;

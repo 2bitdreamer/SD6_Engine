@@ -4,10 +4,6 @@
 #include "WidgetStyle.hpp"
 #include <functional>
 
-namespace {
-	bool _ = UISystem::RegisterWidget("WidgetBase", std::bind(&WidgetBase::Create));
-};
-
 WidgetBase::WidgetBase() :
 	m_parentWidget(nullptr),
 	m_currentState(UI_STATE_DEFAULT)
@@ -15,7 +11,8 @@ WidgetBase::WidgetBase() :
 	//#TODO: should probably have different defaults for different states.
 	SetPropertyForState("offset", UI_STATE_ALL, Vec2(0.f, 0.f));
 	SetPropertyForState("size", UI_STATE_ALL, Vec2(100.f, 50.f));
-	SetPropertyForState("edge color", UI_STATE_ALL, RGBA(200, 200, 200, 255));
+	SetPropertyForState("border color", UI_STATE_ALL, RGBA(200, 200, 200, 255));
+	SetPropertyForState("border size", UI_STATE_ALL, 5.f);
 	SetPropertyForState("opacity", UI_STATE_ALL, 1.f);
 	SetPropertyForState("color", UI_STATE_HIGHLIGHTED, RGBA(255, 255, 255, 255));
 }
@@ -99,11 +96,12 @@ void WidgetBase::Update(double deltaTimeSeconds)
 {
 	float deltaTimeFloat = (float)deltaTimeSeconds;
 
-	UpdateProperty<RGBA>("edge color", deltaTimeFloat);
+	UpdateProperty<RGBA>("border color", deltaTimeFloat);
 	UpdateProperty<RGBA>("color", deltaTimeFloat);
 	UpdateProperty<Vec2>("size", deltaTimeFloat);
 	UpdateProperty<Vec2>("offset", deltaTimeFloat);
 	UpdateProperty<float>("opacity", deltaTimeFloat);
+	UpdateProperty<float>("border size", deltaTimeFloat);
 }
 
 void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
@@ -113,7 +111,7 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 	RGBA edgeColor;
 	Vertex baseOutlineVertex;
 	Vertex outlineVertices[4];
-	GetPropertyForCurrentState("edge color", edgeColor);
+	GetPropertyForCurrentState("border color", edgeColor);
 	edgeColor.a() *= opacity;
 	baseOutlineVertex.m_color = edgeColor;
 
@@ -125,7 +123,7 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 	bottomLeftOutlineVertex.m_position = worldPos;
 	topLeftOutlineVertex.m_position = worldPos + Vec2(0.f, size.y());
 	topRightOutlineVertex.m_position = worldPos + size;
-	bottomLeftOutlineVertex.m_position = worldPos + Vec2(size.x(), 0.f);
+	bottomRightOutlineVertex.m_position = worldPos + Vec2(size.x(), 0.f);
 
 	outlineVertices[0] = bottomLeftOutlineVertex;
 	outlineVertices[1] = topLeftOutlineVertex;
@@ -157,7 +155,7 @@ void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
 	bottomLeftVertex.m_position = worldPos;
 	topLeftVertex.m_position = worldPos + Vec2(0.f, size.y());
 	topRightVertex.m_position = worldPos + size;
-	bottomLeftVertex.m_position = worldPos + Vec2(size.x(), 0.f);
+	bottomRightVertex.m_position = worldPos + Vec2(size.x(), 0.f);
 
 	verticesToRender[0] = bottomLeftVertex;
 	verticesToRender[1] = topLeftVertex;
@@ -194,6 +192,9 @@ void WidgetBase::Render()
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
 
+	float borderSize;
+	GetPropertyForCurrentState("border size", borderSize);
+
 	RenderBackground(worldPos, size);
 	RenderOutline(worldPos, size);
 }
@@ -204,13 +205,18 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			KeyFrameAnimation<Vec2> size;
 			KeyFrameAnimation<RGBA> color;
 			KeyFrameAnimation<RGBA> edgeColor;
+			KeyFrameAnimation<float> borderSize;
 			KeyFrameAnimation<float> opacity;
+			KeyFrameAnimation<RGBA> textColor;
+
 
 			PropertyGetResult ofr = currentNP.Get("offset", offset);
 			PropertyGetResult sr = currentNP.Get("size", size);
 			PropertyGetResult cr = currentNP.Get("color", color);
 			PropertyGetResult opr = currentNP.Get("opacity", opacity);
-			PropertyGetResult ec = currentNP.Get("edge color", edgeColor);
+			PropertyGetResult ec = currentNP.Get("border color", edgeColor);
+			PropertyGetResult bs = currentNP.Get("border size", borderSize);
+			PropertyGetResult tc = currentNP.Get("text color", textColor);
 
 			if (ofr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("offset", offset);
@@ -224,6 +230,12 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			if (opr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("opacity", opacity);
 
-			if (opr == RESULT_SUCCESS)
-				m_stateProperties[state].Set("edge color", edgeColor);
+			if (ec == RESULT_SUCCESS)
+				m_stateProperties[state].Set("border color", edgeColor);
+
+			if (bs == RESULT_SUCCESS)
+				m_stateProperties[state].Set("border size", borderSize);
+
+			if (tc == RESULT_SUCCESS)
+				m_stateProperties[state].Set("text color", textColor);
 }

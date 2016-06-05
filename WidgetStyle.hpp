@@ -48,7 +48,7 @@ public:
 	bool Applies(const std::string& widgetName) const;
 
 	~WidgetStyle();
-	std::map<State, NamedProperties, std::greater<State>> GetProperties() const { return m_properties; }
+	std::map<State, NamedProperties, std::greater<State>>& GetProperties() { return m_properties; }
 	// ...
 
 private:

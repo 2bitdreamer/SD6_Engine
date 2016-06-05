@@ -73,11 +73,11 @@ public:
 
 	template <typename T>
 	void UpdateProperty(const std::string& name, float deltaTimeSeconds) {
-		KeyFrameAnimation<T> asKFA;
-		PropertyGetResult resultForKFA = m_stateProperties[m_currentState].Get(name, asKFA);
+// 		KeyFrameAnimation<T> asKFA;
+// 		PropertyGetResult resultForKFA = m_stateProperties[m_currentState].Get(name, asKFA);
 
-		if (resultForKFA == RESULT_SUCCESS)
-			asKFA.Update(deltaTimeSeconds);
+		KeyFrameAnimation<T>& asKFA = m_stateProperties[m_currentState].Get<KeyFrameAnimation<T>>(name);
+		asKFA.Update(deltaTimeSeconds); 		
 	}
 
 	template<typename T>
