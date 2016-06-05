@@ -81,7 +81,10 @@ WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const st
 	FATAL_ASSERT(result != s_widgetFactory.end());
 	wid = result->second(data);
 
-	wid->ApplyStyle(baseStyle);
+	if (baseStyle) {
+		wid->ApplyStyle(baseStyle);
+	}
+
 	return wid;
 }
 
@@ -100,8 +103,6 @@ void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) 
 	wb->m_parentWidget = parent;
 	parent->m_children.push_back(wb);
 }
-
-
 
 
 void UISystem::Render() {

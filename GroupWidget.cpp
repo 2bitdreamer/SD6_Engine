@@ -44,9 +44,13 @@ void GroupWidget::OnMouseEvent(MouseEvent me) {
 WidgetBase* GroupWidget::Create(const TiXmlNode* data)
 {
 	GroupWidget* gw = new GroupWidget();
-	for (const TiXmlNode* widgetDefinition = data->FirstChild("Children"); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
-	{
-		UISystem::CreateWidgetInParent(gw, widgetDefinition);
+
+	const TiXmlNode* children = data->FirstChild("Children");
+	if (children) {
+		for (const TiXmlNode* widgetDefinition = children->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
+		{
+			UISystem::CreateWidgetInParent(gw, widgetDefinition);
+		}
 	}
 
 	return gw;
