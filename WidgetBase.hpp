@@ -3,28 +3,6 @@
 #include <string>
 class WidgetStyle;
 
-enum UIState {
-	UI_STATE_DEFAULT,
-	UI_STATE_HIGHLIGHTED,
-	UI_STATE_PRESSED,
-	UI_STATE_DISABLED,
-	UI_STATE_ALL,
-	NUM_UI_STATES
-};
-
-enum MouseEventType {
-	LEFT_BUTTON_DOWN,
-	LEFT_BUTTON_UP,
-	RIGHT_BUTTON_DOWN,
-	RIGHT_BUTTON_UP,
-	MOVED
-};
-
-struct MouseEvent {
-	Vec2 m_cursorPos;
-	MouseEventType m_mouseEventType;
-};
-
 class WidgetBase
 {
 public:
@@ -101,17 +79,16 @@ public:
 	virtual void Update(double deltaTimeSeconds);
 	virtual void Render();
 
-	void RenderOutline(const Vec2& worldPos, const Vec2& size);
+	void RenderOutline(const Vec2& worldPos, const Vec2& widgetSize, float lineWidth);
 	void RenderBackground(const Vec2& worldPos, const Vec2& size);
 
 	static WidgetBase* Create();
+	void CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP);
 
 	void ApplyStyle(WidgetStyle* baseStyle);
 public:
 	NamedProperties m_stateProperties[ NUM_UI_STATES ];
 	UIState m_currentState;
 	WidgetBase* m_parentWidget;
-private:
-	void CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP);
 };
 

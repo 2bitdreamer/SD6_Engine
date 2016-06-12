@@ -23,6 +23,11 @@ public:
 	NamedProperties();
 	~NamedProperties();
 
+	std::map<std::string, TypedPropertyBase*>& GetPropertyMap()
+	{
+		return m_properties;
+	}
+
 	template<typename T_PropertyType1, typename T_PropertyType2, typename T_PropertyType3>
 	NamedProperties(const std::string& propertyName1, const T_PropertyType1& propVal1, const std::string& propertyName2, const T_PropertyType2& propVal2, const std::string& propertyName3, const T_PropertyType3& propVal3);
 

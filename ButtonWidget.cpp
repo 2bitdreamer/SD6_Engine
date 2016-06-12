@@ -21,8 +21,12 @@ ButtonWidget::~ButtonWidget()
 WidgetBase* ButtonWidget::Create(const TiXmlNode* data)
 {
 	ButtonWidget* gw = new ButtonWidget();
-	const char* clickEventToFire = data->ToElement()->Attribute("OnClick");
-	gw->SetPropertyForState("click event", UI_STATE_PRESSED, std::string(clickEventToFire));
+
+	if (data) {
+		const char* clickEventToFire = data->ToElement()->Attribute("OnClick");
+		gw->SetPropertyForState("click event", UI_STATE_PRESSED, std::string(clickEventToFire));
+	}
+
 	return gw;
 }
 
@@ -48,18 +52,24 @@ void ButtonWidget::Update(double deltaTimeSeconds)
 }
 
 float ButtonWidget::GetTextOpacity() {
+	RGBA textColor;
+	GetPropertyForCurrentState("text color", textColor);
+
 	float textOpacity;
 	GetPropertyForCurrentState("text opacity", textOpacity);
-	return m_parentWidget->GetOpacity() * textOpacity;
+
+	float textColorAlphaAsFloat = (float)(textColor.a() / 255.f);
+
+	return GetOpacity() * textOpacity * textColorAlphaAsFloat;
 }
 
-Vec2 ButtonWidget::GetCenter(const std::string& text, float cellSize)
+Vec2 ButtonWidget::GetTextLowerLeft(const std::string& text, float cellSize)
 {	
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
 	float textWidth = m_fontRenderer->CalcTextWidth(text, cellSize);
 
-	Vec2 worldPos = GetWorldPosition() + (size / 2) - Vec2(textWidth / 2.f, cellSize / 2.f);
+	Vec2 worldPos = GetWorldPosition() + (size / 2) - (Vec2(textWidth, cellSize) / 2);
 	return worldPos;
 }
 
@@ -76,16 +86,18 @@ void ButtonWidget::Render()
 	float textScale;
 	GetPropertyForCurrentState("text scale", textScale);
 
-	float textOpacity;
-	GetPropertyForCurrentState("text opacity", textOpacity);
+	float opacity;
+	GetPropertyForCurrentState("opacity", opacity);
 
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
 
-	RGBA renderColor = RGBA(textColor.r(), textColor.g(), textColor.b(), GetTextOpacity());
+	float textOpacity = GetTextOpacity();
 
-	float cellSize = size.y() * textScale;
-	m_fontRenderer->DrawString(textToDraw, textColor, GetCenter(textToDraw, cellSize));
+	RGBA renderColor = RGBA(textColor.r(), textColor.g(), textColor.b(), (char)(255 * textOpacity));
+
+	float cellSize = 50.f * textScale;
+	m_fontRenderer->DrawString(textToDraw, renderColor, GetTextLowerLeft(textToDraw, cellSize), cellSize);
 
 	WidgetBase::Render();
 }

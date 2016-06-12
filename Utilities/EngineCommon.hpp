@@ -84,6 +84,28 @@ struct KeyState {
 		m_hasKeyJustBeenReleased(false) {}
 };
 
+enum UIState {
+	UI_STATE_DEFAULT,
+	UI_STATE_HIGHLIGHTED,
+	UI_STATE_PRESSED,
+	UI_STATE_DISABLED,
+	UI_STATE_ALL,
+	NUM_UI_STATES
+};
+
+enum MouseEventType {
+	LEFT_BUTTON_DOWN,
+	LEFT_BUTTON_UP,
+	RIGHT_BUTTON_DOWN,
+	RIGHT_BUTTON_UP,
+	MOVED
+};
+
+struct MouseEvent {
+	Vec2 m_cursorPos;
+	MouseEventType m_mouseEventType;
+};
+
 struct MouseState {
 	Vec2i m_mousePosition;
 

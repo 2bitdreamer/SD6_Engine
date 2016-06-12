@@ -1,8 +1,13 @@
 #include "WidgetStyle.hpp"
 #include "UISystem.hpp"
-
+#include <algorithm>
+#include <iterator>
 
 WidgetStyle::WidgetStyle()
+{
+}
+
+WidgetStyle::~WidgetStyle()
 {
 }
 
@@ -18,6 +23,8 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 	const TiXmlNode* offset = stateDefinition->FirstChild("Offset");
 	const TiXmlNode* opacity = stateDefinition->FirstChild("Opacity");
 	const TiXmlNode* textColor = stateDefinition->FirstChild("TextColor");
+	const TiXmlNode* fontSize = stateDefinition->FirstChild("FontSize");
+	const TiXmlNode* textOpacity = stateDefinition->FirstChild("TextOpacity");
 
 
 	if (bgcolor) {
@@ -95,7 +102,7 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 	if (opacity) {
 		KeyFrameAnimation <float> opacitySeq;
 		float opacityVal = atof(opacity->ToElement()->Attribute("value"));
-		opacitySeq.AddAnimationFrameAtParameter(0.f, opacityVal);
+		opacitySeq.AddAnimationFrameAtParameter(opacityVal, 0.f);
 
 		widgetAttributes.Set("opacity", opacitySeq);
 	}
@@ -103,7 +110,7 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 	if (borderSize) {
 		KeyFrameAnimation <float> borderSizeSeq;
 		float borderSizeVal = atof(borderSize->ToElement()->Attribute("value"));
-		borderSizeSeq.AddAnimationFrameAtParameter(0.f, borderSizeVal);
+		borderSizeSeq.AddAnimationFrameAtParameter(borderSizeVal, 0.f);
 
 		widgetAttributes.Set("border size", borderSizeSeq);
 	}
@@ -156,25 +163,72 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		widgetAttributes.Set("text color", textColorSeq);
 	}
 
+	if (fontSize) {
+		KeyFrameAnimation <float> fontSizeSeq;
+
+		const TiXmlElement* fontSizeElement = fontSize->ToElement();
+		float fontSize = atof(fontSizeElement->Attribute("value"));
+
+		fontSizeSeq.AddAnimationFrameAtParameter(fontSize, 0.f);
+		widgetAttributes.Set("text scale", fontSizeSeq);
+	}
+
+	if (textOpacity) {
+		KeyFrameAnimation <float> textOpacityAnim;
+
+		const TiXmlElement* textOpacityElement = textOpacity->ToElement();
+		float textOpacity = atof(textOpacityElement->Attribute("value"));
+
+		textOpacityAnim.AddAnimationFrameAtParameter(textOpacity, 0.f);
+		widgetAttributes.Set("text opacity", textOpacityAnim);
+	}
+
 	return widgetAttributes;
 }
 
 
 WidgetStyle::WidgetStyle(const TiXmlNode* node)
 {
-		const char* widgetName = node->ToElement()->Value();
+	std::vector<std::string> statesInXML;
+	std::vector<std::string> allStates;
+	std::vector<std::string> diff;
+	for (UIState state = UI_STATE_DEFAULT; state < (NUM_UI_STATES - 1); state = (UIState)(state + 1)) {
+		allStates.push_back(WidgetBase::GetNameForState(state));
+	}
+	std::sort(allStates.begin(), allStates.end());
+	const char* widgetName = node->ToElement()->Value();
+	AddTarget(widgetName);
 
-		//Iterate over each state definition for the widget type
-		for (const TiXmlNode* stateDefinition = node->FirstChild(); node; node = node->NextSibling())
+	//Iterate over each state definition for the widget type
+
+	const TiXmlNode* allDef = node->FirstChild("All");
+	NamedProperties allAttributes = ExtractWidgetAttributesFromStateDefinition(allDef);
+	auto allAttributesMap = allAttributes.GetPropertyMap();
+	for (const TiXmlNode* stateDefinition = node->FirstChild(); stateDefinition; stateDefinition = stateDefinition->NextSibling())
+	{
+		std::string stateName = stateDefinition->ToElement()->Value();
+		statesInXML.push_back(stateName);
+		if (stateName != "All")
 		{
-			std::string stateName = stateDefinition->ToElement()->Value();
 			UIState state = WidgetBase::GetStateForName(stateName);
 			NamedProperties widgetAttributes = ExtractWidgetAttributesFromStateDefinition(stateDefinition);
-			
-			AddTarget(widgetName);
+			widgetAttributes.GetPropertyMap().insert(allAttributesMap.begin(), allAttributesMap.end());
 			AddProperty(state, widgetAttributes);
+
+
 		}
 	}
+
+	std::sort(statesInXML.begin(), statesInXML.end());
+	std::set_difference(allStates.begin(), allStates.end(), statesInXML.begin(), statesInXML.end(), std::inserter(diff, diff.begin()));
+
+	for (auto it = diff.begin(); it != diff.end(); ++it)
+	{
+		UIState state = WidgetBase::GetStateForName(*it);
+		AddProperty(state, allAttributes);
+	}
+
+}
 
 void WidgetStyle::AddTarget(const std::string& widgetName)
 {
@@ -225,14 +279,9 @@ void WidgetStyle::AddTransitionProperty(UIState start, UIState end, const NamedP
 	GetProperties()[st] = prop;
 }
 
-
 bool WidgetStyle::Applies(const std::string& widgetName) const
 {
 	return m_targetWidgets.count(widgetName) > 0 || m_targetWidgets.empty();
-}
-
-WidgetStyle::~WidgetStyle()
-{
 }
 
 void WidgetStyle::ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const TiXmlNode* animationDefinition)

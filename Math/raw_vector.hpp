@@ -1,6 +1,6 @@
 #pragma once
 #pragma warning(push)
-
+#include <cmath>
 #include <cstdlib>
 #include "EulerAngles.hpp"
 #include <utility>

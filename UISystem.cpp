@@ -65,10 +65,9 @@ void UISystem::ReadWidgetFile(const std::string& filePath) {
 
 	for (TiXmlElement* widgetDefinition = doc.FirstChildElement(); widgetDefinition != NULL; widgetDefinition = widgetDefinition->NextSiblingElement())
 	{
-		CreateWidgetInParent(m_rootWidget, widgetDefinition);
+		AddWidgetInParent(m_rootWidget, widgetDefinition);
 	}
 
-	//#TODO: Handle GroupWidgets and such
 	//ReadWidgetFile delegates itself to a function that takes a GroupWidget(parent) and a TiXMLNode* 
 }
 
@@ -88,7 +87,16 @@ WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const st
 	return wid;
 }
 
-void UISystem::CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
+WidgetBase* UISystem::AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, const NamedProperties props, GroupWidget* parent) {
+	WidgetBase* wb = CreateStyledWidget(widgetType, styleName, nullptr);
+
+	wb->m_parentWidget = parent;
+	parent->m_children.push_back(wb);
+
+	return wb;
+}
+
+void UISystem::AddWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
 	const char* widgetName = data->ToElement()->Value();
 	const char* styleName = data->ToElement()->Attribute("style");
 
@@ -110,7 +118,7 @@ void UISystem::Render() {
 }
 
 void UISystem::OnMouseEvent(MouseEvent me) {
-
+	m_rootWidget->OnMouseEvent(me);
 }
 
 void UISystem::Update(double deltaTimeSeconds)

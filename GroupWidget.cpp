@@ -27,6 +27,7 @@ void GroupWidget::Render()
 void GroupWidget::OnMouseEvent(MouseEvent me) {
 	//Has click-through problem
 
+	Vec2 convertedMouseCoord = Vec2(me.m_cursorPos.x(), SCREEN_HEIGHT - me.m_cursorPos.y());
 	for (auto& wb : m_children) {
 		Vec2 size;
 		Vec2 wp = wb->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
@@ -35,7 +36,7 @@ void GroupWidget::OnMouseEvent(MouseEvent me) {
 
 		Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
 
-		if (wp.x() >= me.m_cursorPos.x() && wp.y() >= me.m_cursorPos.y() && wp.x() <= maxBounds.x() && wp.y() <= maxBounds.y()) {
+		if (wp.x() <= convertedMouseCoord.x() && wp.y() <= convertedMouseCoord.y() && convertedMouseCoord.x() <= maxBounds.x() && convertedMouseCoord.y() <= maxBounds.y()) {
 			wb->OnMouseEvent(me);
 		}
 	}
@@ -49,7 +50,7 @@ WidgetBase* GroupWidget::Create(const TiXmlNode* data)
 	if (children) {
 		for (const TiXmlNode* widgetDefinition = children->FirstChild(); widgetDefinition; widgetDefinition = widgetDefinition->NextSibling())
 		{
-			UISystem::CreateWidgetInParent(gw, widgetDefinition);
+			UISystem::AddWidgetInParent(gw, widgetDefinition);
 		}
 	}
 

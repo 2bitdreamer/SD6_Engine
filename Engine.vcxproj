@@ -18,6 +18,7 @@
     <ProjectGuid>{220117B3-FF15-4975-BF35-7CF07AF06529}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -181,7 +182,6 @@
     <ClCompile Include="Assert.cpp" />
     <ClCompile Include="BitArray.cpp" />
     <ClCompile Include="ButtonWidget.cpp" />
-    <ClCompile Include="CalculateOrderJob.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="EventSystem.cpp" />
@@ -245,7 +245,6 @@
     <ClInclude Include="Assert.hpp" />
     <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="ButtonWidget.hpp" />
-    <ClInclude Include="CalculateOrderJob.hpp" />
     <ClInclude Include="Clock.hpp" />
     <ClInclude Include="Command.hpp" />
     <ClInclude Include="EventSystem.hpp" />

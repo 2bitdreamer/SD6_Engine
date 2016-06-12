@@ -14,7 +14,7 @@ WidgetBase::WidgetBase() :
 	SetPropertyForState("border color", UI_STATE_ALL, RGBA(200, 200, 200, 255));
 	SetPropertyForState("border size", UI_STATE_ALL, 5.f);
 	SetPropertyForState("opacity", UI_STATE_ALL, 1.f);
-	SetPropertyForState("color", UI_STATE_HIGHLIGHTED, RGBA(255, 255, 255, 255));
+	SetPropertyForState("color", UI_STATE_ALL, RGBA(255, 255, 255, 255));
 }
 
 WidgetBase::~WidgetBase()
@@ -104,8 +104,10 @@ void WidgetBase::Update(double deltaTimeSeconds)
 	UpdateProperty<float>("border size", deltaTimeFloat);
 }
 
-void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
+void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& widgetSize, float lineWidth)
 {
+	glPushAttrib(GL_LINE_BIT);
+	glLineWidth(lineWidth);
 	float opacity = GetOpacity();
 
 	RGBA edgeColor;
@@ -113,6 +115,7 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 	Vertex outlineVertices[4];
 	GetPropertyForCurrentState("border color", edgeColor);
 	edgeColor.a() *= opacity;
+
 	baseOutlineVertex.m_color = edgeColor;
 
 	Vertex bottomLeftOutlineVertex = baseOutlineVertex;
@@ -121,9 +124,9 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 	Vertex bottomRightOutlineVertex = baseOutlineVertex;
 
 	bottomLeftOutlineVertex.m_position = worldPos;
-	topLeftOutlineVertex.m_position = worldPos + Vec2(0.f, size.y());
-	topRightOutlineVertex.m_position = worldPos + size;
-	bottomRightOutlineVertex.m_position = worldPos + Vec2(size.x(), 0.f);
+	topLeftOutlineVertex.m_position = worldPos + Vec2(0.f, widgetSize.y());
+	topRightOutlineVertex.m_position = worldPos + widgetSize;
+	bottomRightOutlineVertex.m_position = worldPos + Vec2(widgetSize.x(), 0.f);
 
 	outlineVertices[0] = bottomLeftOutlineVertex;
 	outlineVertices[1] = topLeftOutlineVertex;
@@ -132,6 +135,7 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& size)
 
 	Renderer& renderer = Renderer::GetInstance();
 	renderer.RenderPrimitives(GL_LINE_LOOP, outlineVertices, 4);
+	glPopAttrib();
 }
 
 void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
@@ -196,7 +200,7 @@ void WidgetBase::Render()
 	GetPropertyForCurrentState("border size", borderSize);
 
 	RenderBackground(worldPos, size);
-	RenderOutline(worldPos, size);
+	RenderOutline(worldPos, size, borderSize);
 }
 
 void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP)

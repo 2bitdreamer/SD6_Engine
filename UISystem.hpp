@@ -21,8 +21,9 @@ public:
 	void Update(double deltaTimeSeconds);
 	static bool RegisterWidget(const std::string& name, std::function<WidgetBase*(const TiXmlNode*)> creationFunc);
 	static WidgetBase* CreateStyledWidget(const std::string& widgetType, const std::string& styleName, const TiXmlNode* data);
+	static WidgetBase* AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, const NamedProperties props, GroupWidget* parent);
 	void ReadWidgetFile(const std::string& filePath);
-	static void CreateWidgetInParent(GroupWidget* parent, const TiXmlNode* data);
+	static void AddWidgetInParent(GroupWidget* parent, const TiXmlNode* data);
 public:
 	GroupWidget* m_rootWidget;
 	//StyleName, WidgetType for the strings

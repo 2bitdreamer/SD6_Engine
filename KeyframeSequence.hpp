@@ -73,9 +73,12 @@ public:
 		for (size_t index = 0; index < m_keyFrames.size() - 1; index++) {
 			KeyFrame<T> ks = m_keyFrames[index];
 			KeyFrame<T> oneLater = m_keyFrames[index + 1];
+			float fractionThisKeyframe = ks.m_parameter / lastParam;
+			float fractionNextKeyframe = oneLater.m_parameter / lastParam;
+			float timeSinceStart = lastParam * parameter;
 
-			if (parameter >= ks.m_parameter && parameter <= oneLater.m_parameter) {
-				float fraction = (parameter - ks.m_parameter) / (oneLater.m_parameter - ks.m_parameter);
+			if (parameter >= fractionThisKeyframe && (parameter <= fractionNextKeyframe)) {
+				float fraction = (timeSinceStart - ks.m_parameter) / (oneLater.m_parameter - ks.m_parameter);
 				T interp = Interpolate(ks.m_valueAtParameter, oneLater.m_valueAtParameter, fraction);
 				return interp;
 			}
