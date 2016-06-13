@@ -190,44 +190,24 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 WidgetStyle::WidgetStyle(const TiXmlNode* node)
 {
 	std::vector<std::string> statesInXML;
-	std::vector<std::string> allStates;
-	std::vector<std::string> diff;
-	for (UIState state = UI_STATE_DEFAULT; state < (NUM_UI_STATES - 1); state = (UIState)(state + 1)) {
-		allStates.push_back(WidgetBase::GetNameForState(state));
-	}
-	std::sort(allStates.begin(), allStates.end());
 	const char* widgetName = node->ToElement()->Value();
 	AddTarget(widgetName);
 
-	//Iterate over each state definition for the widget type
-
-	const TiXmlNode* allDef = node->FirstChild("All");
-	NamedProperties allAttributes = ExtractWidgetAttributesFromStateDefinition(allDef);
-	auto allAttributesMap = allAttributes.GetPropertyMap();
 	for (const TiXmlNode* stateDefinition = node->FirstChild(); stateDefinition; stateDefinition = stateDefinition->NextSibling())
 	{
 		std::string stateName = stateDefinition->ToElement()->Value();
 		statesInXML.push_back(stateName);
+		NamedProperties widgetAttributes = ExtractWidgetAttributesFromStateDefinition(stateDefinition);
 		if (stateName != "All")
 		{
 			UIState state = WidgetBase::GetStateForName(stateName);
-			NamedProperties widgetAttributes = ExtractWidgetAttributesFromStateDefinition(stateDefinition);
-			widgetAttributes.GetPropertyMap().insert(allAttributesMap.begin(), allAttributesMap.end());
 			AddProperty(state, widgetAttributes);
-
-
+		}
+		else
+		{
+			AddGeneralProperty(widgetAttributes);
 		}
 	}
-
-	std::sort(statesInXML.begin(), statesInXML.end());
-	std::set_difference(allStates.begin(), allStates.end(), statesInXML.begin(), statesInXML.end(), std::inserter(diff, diff.begin()));
-
-	for (auto it = diff.begin(); it != diff.end(); ++it)
-	{
-		UIState state = WidgetBase::GetStateForName(*it);
-		AddProperty(state, allAttributes);
-	}
-
 }
 
 void WidgetStyle::AddTarget(const std::string& widgetName)

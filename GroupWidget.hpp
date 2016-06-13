@@ -10,7 +10,7 @@ public:
 	
 	virtual void Update(double deltaTimeSeconds);
 	virtual void Render();
-	virtual void OnMouseEvent(MouseEvent me);
+	virtual void OnMouseFocusEvent(MouseEvent me);
 
 	static WidgetBase* Create(const TiXmlNode* data);
 

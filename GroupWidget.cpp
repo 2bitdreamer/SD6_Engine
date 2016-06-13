@@ -24,7 +24,7 @@ void GroupWidget::Render()
 	}
 }
 
-void GroupWidget::OnMouseEvent(MouseEvent me) {
+void GroupWidget::OnMouseFocusEvent(MouseEvent me) {
 	//Has click-through problem
 
 	Vec2 convertedMouseCoord = Vec2(me.m_cursorPos.x(), SCREEN_HEIGHT - me.m_cursorPos.y());
@@ -37,7 +37,10 @@ void GroupWidget::OnMouseEvent(MouseEvent me) {
 		Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
 
 		if (wp.x() <= convertedMouseCoord.x() && wp.y() <= convertedMouseCoord.y() && convertedMouseCoord.x() <= maxBounds.x() && convertedMouseCoord.y() <= maxBounds.y()) {
-			wb->OnMouseEvent(me);
+			wb->OnMouseFocusEvent(me);
+		}
+		else if (wb->m_currentState != UI_STATE_DEFAULT) {
+			wb->OnMouseUnfocusEvent(me);
 		}
 	}
 }

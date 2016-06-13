@@ -68,9 +68,8 @@ void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor)
 }
 
 
-void WidgetBase::OnMouseEvent(MouseEvent me) {
-
-
+void WidgetBase::OnMouseFocusEvent(MouseEvent me) {
+	
 }
 
 Vec2 WidgetBase::GetWorldPosition()
@@ -175,18 +174,41 @@ WidgetBase* WidgetBase::Create()
 	return new WidgetBase();
 }
 
+void WidgetBase::ApplyGeneralStyleToAll(WidgetStyle* baseStyle)
+{
+	auto properties = baseStyle->GetProperties();
+	auto it = properties.begin();
+	State st = it->first;
+	const NamedProperties& np = it->second;
+
+	for (UIState st = UI_STATE_DEFAULT; st < NUM_UI_STATES; st = (UIState)(st + 1)) {
+		CopyStatePropertyToWidget(st, np);
+	}
+}
+
 void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
 {
 	auto properties = baseStyle->GetProperties();
 
+	bool first = true;
 	for (auto it = properties.begin(); it != properties.end(); ++it) {
-		State st = it->first;
-		const NamedProperties& np = it->second;
+		if (!first)
+		{
+			State st = it->first;
+			const NamedProperties& np = it->second;
 
-		if (st.type == STATE_NONE) {
-			CopyStatePropertyToWidget(st.state1, np);
+			if (st.type == STATE_NONE) {
+				CopyStatePropertyToWidget(st.state1, np);
+			}
 		}
+		else
+			first = false;
 	}
+}
+
+void WidgetBase::OnMouseUnfocusEvent(MouseEvent me)
+{
+
 }
 
 void WidgetBase::Render()
@@ -212,7 +234,8 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			KeyFrameAnimation<float> borderSize;
 			KeyFrameAnimation<float> opacity;
 			KeyFrameAnimation<RGBA> textColor;
-
+			KeyFrameAnimation<float> textScale;
+			KeyFrameAnimation<float> textOpacity;
 
 			PropertyGetResult ofr = currentNP.Get("offset", offset);
 			PropertyGetResult sr = currentNP.Get("size", size);
@@ -221,6 +244,8 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			PropertyGetResult ec = currentNP.Get("border color", edgeColor);
 			PropertyGetResult bs = currentNP.Get("border size", borderSize);
 			PropertyGetResult tc = currentNP.Get("text color", textColor);
+			PropertyGetResult ts = currentNP.Get("text scale", textScale);
+			PropertyGetResult to = currentNP.Get("text opacity", textOpacity);
 
 			if (ofr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("offset", offset);
@@ -242,4 +267,10 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 
 			if (tc == RESULT_SUCCESS)
 				m_stateProperties[state].Set("text color", textColor);
+
+			if (ts == RESULT_SUCCESS)
+				m_stateProperties[state].Set("text scale", textScale);
+
+			if (to == RESULT_SUCCESS)
+				m_stateProperties[state].Set("text opacity", textOpacity);
 }

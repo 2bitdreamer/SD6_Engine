@@ -8,7 +8,7 @@ ButtonWidget::ButtonWidget() :
 	m_fontRenderer(new XMLFontRenderer())
 {
 	SetPropertyForState("button text", UI_STATE_ALL, std::string("Default"));
-	SetPropertyForState("text scale", UI_STATE_ALL, 1.f);
+	SetPropertyForState("text scale", UI_STATE_ALL, 10.f);
 	SetPropertyForState("text color", UI_STATE_ALL, RGBA(255, 255, 255, 255));
 	SetPropertyForState("text opacity", UI_STATE_ALL, 1.f);
 }
@@ -31,12 +31,37 @@ WidgetBase* ButtonWidget::Create(const TiXmlNode* data)
 }
 
 
-void ButtonWidget::OnMouseEvent(MouseEvent me)
+void ButtonWidget::OnMouseFocusEvent(MouseEvent me)
 {
-	m_currentState = UI_STATE_PRESSED;
-	std::string eventToFire;
-	//GetPropertyForCurrentState("click event", eventToFire);
-	FireEvent(eventToFire);
+	if (me.m_mouseEventType == LEFT_BUTTON_DOWN) {
+		m_currentState = UI_STATE_PRESSED;
+	}
+	else if (me.m_mouseEventType == LEFT_BUTTON_UP && m_currentState == UI_STATE_PRESSED) { //BUTTON CLICK
+		std::string eventToFire;
+		//GetPropertyForCurrentState("click event", eventToFire);
+		FireEvent(eventToFire);
+		m_currentState = UI_STATE_DEFAULT;
+	}
+	else if (me.m_mouseEventType == MOVED && (GetKeyState(VK_LBUTTON) & 0x100) == 0) { //On the button, but not clicking
+		m_currentState = UI_STATE_HIGHLIGHTED;
+	}
+
+	WidgetBase::OnMouseFocusEvent(me);
+
+}
+
+void ButtonWidget::OnMouseUnfocusEvent(MouseEvent me)
+{
+
+	if (me.m_mouseEventType == LEFT_BUTTON_UP) { // Not on the button, released 
+		m_currentState = UI_STATE_DEFAULT;
+	}
+
+	if (me.m_mouseEventType == MOVED && m_currentState != UI_STATE_PRESSED) { //Not on the button, moved
+		m_currentState = UI_STATE_DEFAULT;
+	}
+
+	WidgetBase::OnMouseUnfocusEvent(me);
 }
 
 void ButtonWidget::Update(double deltaTimeSeconds)
@@ -77,6 +102,8 @@ Vec2 ButtonWidget::GetTextLowerLeft(const std::string& text, float cellSize)
 
 void ButtonWidget::Render()
 {
+	WidgetBase::Render();
+
 	std::string textToDraw;
 	GetPropertyForCurrentState("button text", textToDraw);
 
@@ -96,8 +123,10 @@ void ButtonWidget::Render()
 
 	RGBA renderColor = RGBA(textColor.r(), textColor.g(), textColor.b(), (char)(255 * textOpacity));
 
-	float cellSize = 50.f * textScale;
-	m_fontRenderer->DrawString(textToDraw, renderColor, GetTextLowerLeft(textToDraw, cellSize), cellSize);
+	float cellSize = 5.f * textScale;
 
-	WidgetBase::Render();
+	Vec3 renderPos = GetTextLowerLeft(textToDraw, cellSize);
+	//renderPos.z() = -100.f;
+	m_fontRenderer->DrawString(textToDraw, renderColor, renderPos, cellSize);
+
 }

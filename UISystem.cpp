@@ -37,6 +37,26 @@ UISystem::UISystem() :
 		std::string filePath = *it;
 		ReadWidgetFile(filePath);
 	}
+
+	WidgetStyle wid;
+	NamedProperties defaultProps;
+	NamedProperties allProps;
+
+	KeyFrameAnimation<RGBA> animColor;
+	animColor.AddAnimationFrameAtParameter(RGBA(50, 255, 50, 255), 0.f);
+	//defaultProps.Set("color", animColor);
+
+	KeyFrameAnimation<Vec2> offsetAnim;
+	offsetAnim.AddAnimationFrameAtParameter(Vec2(100.f, 500.f), 0.f);
+	allProps.Set("offset", offsetAnim);
+
+	KeyFrameAnimation<RGBA> animColor2;
+	animColor2.AddAnimationFrameAtParameter(RGBA(255, 0, 0, 255), 0.f);
+	allProps.Set("color", animColor2);
+
+	wid.AddProperty(UI_STATE_DEFAULT, defaultProps);
+	wid.AddGeneralProperty(allProps);
+	WidgetBase* widget = AddStyledWidgetExplicitly("Button", "Default", wid, m_rootWidget);
 }
 
 void UISystem::ReadStyleFile(const std::string& filePath) {
@@ -71,8 +91,7 @@ void UISystem::ReadWidgetFile(const std::string& filePath) {
 	//ReadWidgetFile delegates itself to a function that takes a GroupWidget(parent) and a TiXMLNode* 
 }
 
-WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const std::string& styleName, const TiXmlNode* data) {
-	WidgetStyle* baseStyle = s_styles[styleName][widgetType];
+WidgetBase* UISystem::CreateWidget(const std::string& widgetType, const TiXmlNode* data) {
 	WidgetBase* wid;
 
 	auto result = s_widgetFactory.find(widgetType);
@@ -80,20 +99,30 @@ WidgetBase* UISystem::CreateStyledWidget(const std::string& widgetType, const st
 	FATAL_ASSERT(result != s_widgetFactory.end());
 	wid = result->second(data);
 
-	if (baseStyle) {
-		wid->ApplyStyle(baseStyle);
-	}
-
 	return wid;
 }
 
-WidgetBase* UISystem::AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, const NamedProperties props, GroupWidget* parent) {
-	WidgetBase* wb = CreateStyledWidget(widgetType, styleName, nullptr);
+WidgetBase* UISystem::AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, WidgetStyle& widgetDefinition, GroupWidget* parent) {
+	WidgetBase* wb = CreateWidget(widgetType, nullptr);
+
+	WidgetStyle* ws = s_styles[styleName][widgetType];
+	wb->ApplyGeneralStyleToAll(ws);
+	wb->ApplyGeneralStyleToAll(&widgetDefinition);
+	wb->ApplyStyle(ws);
+	wb->ApplyStyle(&widgetDefinition);
 
 	wb->m_parentWidget = parent;
 	parent->m_children.push_back(wb);
 
 	return wb;
+}
+
+void UISystem::AddStyle(WidgetStyle* style, const std::string& styleName, const std::vector<std::string>& widgetNameList) {
+
+	for (auto it = widgetNameList.begin(); it != widgetNameList.end(); ++it) {
+		std::string widgetName = *it;
+		s_styles[styleName][widgetName] = style;
+	}
 }
 
 void UISystem::AddWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
@@ -103,22 +132,29 @@ void UISystem::AddWidgetInParent(GroupWidget* parent, const TiXmlNode* data) {
 	if (!styleName)
 		styleName = "Default";
 
-	WidgetBase* wb = CreateStyledWidget(widgetName, styleName, data);
+	//Construct the basic styled widget. No properties will be applied
+	WidgetBase* wb = CreateWidget(widgetName, data);
 
+	//Apply the general (All state) style level properties
+	wb->ApplyGeneralStyleToAll(s_styles[styleName][widgetName]);
+	//Apply the general (All state) widget level properties
 	WidgetStyle style = WidgetStyle(data);
+	wb->ApplyGeneralStyleToAll(&style);
+	//Apply the state specific style level properties
+	wb->ApplyStyle(s_styles[styleName][widgetName]);
+	//Apply the state specific widget level properties
 	wb->ApplyStyle(&style);
 
 	wb->m_parentWidget = parent;
 	parent->m_children.push_back(wb);
 }
 
-
 void UISystem::Render() {
 	m_rootWidget->Render();
 }
 
 void UISystem::OnMouseEvent(MouseEvent me) {
-	m_rootWidget->OnMouseEvent(me);
+	m_rootWidget->OnMouseFocusEvent(me);
 }
 
 void UISystem::Update(double deltaTimeSeconds)

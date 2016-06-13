@@ -11,7 +11,8 @@ public:
 	~ButtonWidget();
 
 	static WidgetBase* Create(const TiXmlNode* data);
-	virtual void OnMouseEvent(MouseEvent me);
+	virtual void OnMouseFocusEvent(MouseEvent me);
+	virtual void OnMouseUnfocusEvent(MouseEvent me);
 	virtual void Update(double deltaTimeSeconds);
 	float GetTextOpacity();
 	Vec2 GetTextLowerLeft(const std::string& text, float cellSize);

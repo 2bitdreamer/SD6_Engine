@@ -18,6 +18,10 @@ struct State {
 	inline bool operator>(const State& rhs) const {
 		return rhs.type > type || (rhs.type == type && rhs.state1 > state1) || (rhs.type == type && rhs.state1 == state1 && rhs.state2 > state2);
 	}
+
+	inline bool operator<(const State& rhs) const {
+		return rhs.type < type || (rhs.type == type && rhs.state1 < state1) || (rhs.type == type && rhs.state1 == state1 && rhs.state2 < state2);
+	}
 };
 
 class WidgetStyle {
@@ -48,7 +52,7 @@ public:
 	bool Applies(const std::string& widgetName) const;
 
 	~WidgetStyle();
-	std::map<State, NamedProperties, std::greater<State>>& GetProperties() { return m_properties; }
+	std::map<State, NamedProperties>& GetProperties() { return m_properties; }
 	// ...
 
 private:
@@ -57,7 +61,7 @@ private:
 	/*
 	General properties come before specific properties
 	*/
-	std::map<State, NamedProperties, std::greater<State>> m_properties;
+	std::map<State, NamedProperties> m_properties;
 
 	void ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const TiXmlNode* animationDefinition);
 

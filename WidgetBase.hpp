@@ -14,7 +14,8 @@ public:
 
 
 	virtual void ApplyWidgetProperties(const NamedProperties& widgetDescriptor);
-	virtual void OnMouseEvent(MouseEvent me);
+	virtual void OnMouseFocusEvent(MouseEvent me);
+	virtual void OnMouseUnfocusEvent(MouseEvent me);
 
 	Vec2 GetWorldPosition();
 	float GetOpacity();
@@ -83,6 +84,7 @@ public:
 	void RenderBackground(const Vec2& worldPos, const Vec2& size);
 
 	static WidgetBase* Create();
+	void ApplyGeneralStyleToAll(WidgetStyle* baseStyle);
 	void CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP);
 
 	void ApplyStyle(WidgetStyle* baseStyle);

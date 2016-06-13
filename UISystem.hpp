@@ -20,8 +20,9 @@ public:
 	void OnMouseEvent(MouseEvent me);
 	void Update(double deltaTimeSeconds);
 	static bool RegisterWidget(const std::string& name, std::function<WidgetBase*(const TiXmlNode*)> creationFunc);
-	static WidgetBase* CreateStyledWidget(const std::string& widgetType, const std::string& styleName, const TiXmlNode* data);
-	static WidgetBase* AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, const NamedProperties props, GroupWidget* parent);
+	static WidgetBase* CreateWidget(const std::string& widgetType, const TiXmlNode* data);
+	static WidgetBase* AddStyledWidgetExplicitly(const std::string& widgetType, const std::string& styleName, WidgetStyle& widgetStyle, GroupWidget* parent);
+	void AddStyle(WidgetStyle* style, const std::string& styleName, const std::vector<std::string>& widgetNameList);
 	void ReadWidgetFile(const std::string& filePath);
 	static void AddWidgetInParent(GroupWidget* parent, const TiXmlNode* data);
 public:
