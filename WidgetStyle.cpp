@@ -20,7 +20,7 @@ KeyFrameAnimation<RGBA> WidgetStyle::SetupColorAnimation(const TiXmlElement* col
 	if (strcmp(isLooping, "true") == 0)
 		colorSeq.SetWrapMode(B_LOOP);
 
-	colorSeq.SetDuration(atof(durationSeconds));
+	colorSeq.SetDuration((float)atof(durationSeconds));
 
 	for (const TiXmlNode* animationDefinition = colorElement->FirstChild("KeyFrame"); animationDefinition; animationDefinition = animationDefinition->NextSibling())
 	{
@@ -40,7 +40,7 @@ KeyFrameAnimation<float> WidgetStyle::SetupFloatAnimation(const TiXmlElement* co
 	if (strcmp(isLooping, "true") == 0)
 		floatSeq.SetWrapMode(B_LOOP);
 
-	floatSeq.SetDuration(atof(durationSeconds));
+	floatSeq.SetDuration((float)atof(durationSeconds));
 
 	for (const TiXmlNode* animationDefinition = colorElement->FirstChild("KeyFrame"); animationDefinition; animationDefinition = animationDefinition->NextSibling())
 	{
@@ -58,7 +58,7 @@ KeyFrameAnimation<Vec2> WidgetStyle::SetupVec2Animation(const TiXmlElement* vec2
 	if (strcmp(isLooping, "true") == 0)
 		vec2Seq.SetWrapMode(B_LOOP);
 
-	vec2Seq.SetDuration(atof(durationSeconds));
+	vec2Seq.SetDuration((float)atof(durationSeconds));
 
 	for (const TiXmlNode* animationDefinition = vec2Element->FirstChild("KeyFrame"); animationDefinition; animationDefinition = animationDefinition->NextSibling())
 	{
@@ -76,7 +76,7 @@ void WidgetStyle::ParseFloatAnimation(KeyFrameAnimation<float>& floatSeq, const 
 		const char* time = animationElement->Attribute("time");
 
 		float val = (float)atof(valElement);
-		floatSeq.AddAnimationFrameAtParameter(val, atof(time));
+		floatSeq.AddAnimationFrameAtParameter(val, (float)atof(time));
 }
 
 
@@ -84,7 +84,7 @@ void WidgetStyle::ParseFloatAnimation(KeyFrameAnimation<float>& floatSeq, const 
 NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const TiXmlNode* stateDefinition) {
 	NamedProperties widgetAttributes;
 
-	const char* stateName = stateDefinition->ToElement()->Value();
+	//const char* stateName = stateDefinition->ToElement()->Value();
 	const char* onExit = stateDefinition->ToElement()->Attribute("OnExit");
 	const char* onEnter = stateDefinition->ToElement()->Attribute("OnEnter");
 
@@ -159,8 +159,8 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 			const char* sizeX = sizeElement->Attribute("X");
 			const char* sizeY = sizeElement->Attribute("Y");
 
-			float X = atof(sizeX);
-			float Y = atof(sizeY);
+			float X = (float)atof(sizeX);
+			float Y = (float)atof(sizeY);
 
 			KeyFrameAnimation<Vec2> sizeSeq;
 			sizeSeq.AddAnimationFrameAtParameter(Vec2(X, Y), 0.f);
@@ -182,8 +182,8 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 			const char* offsetX = offsetElement->Attribute("X");
 			const char* offsetY = offsetElement->Attribute("Y");
 
-			float X = atof(offsetX);
-			float Y = atof(offsetY);
+			float X = (float)atof(offsetX);
+			float Y = (float)atof(offsetY);
 
 			KeyFrameAnimation<Vec2> offsetSeq;
 			offsetSeq.AddAnimationFrameAtParameter(Vec2(X, Y), 0.f);
@@ -201,7 +201,7 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		}
 		else {
 			KeyFrameAnimation <float> opacitySeq;
-			float opacityVal = atof(opacity->ToElement()->Attribute("value"));
+			float opacityVal = (float)atof(opacity->ToElement()->Attribute("value"));
 			opacitySeq.AddAnimationFrameAtParameter(opacityVal, 0.f);
 
 			widgetAttributes.Set("opacity", opacitySeq);
@@ -218,7 +218,7 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		}
 		else {
 			KeyFrameAnimation <float> borderSizeSeq;
-			float borderSizeVal = atof(borderSize->ToElement()->Attribute("value"));
+			float borderSizeVal = (float)atof(borderSize->ToElement()->Attribute("value"));
 			borderSizeSeq.AddAnimationFrameAtParameter(borderSizeVal, 0.f);
 
 			widgetAttributes.Set("border size", borderSizeSeq);
@@ -242,10 +242,10 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 			const char* B = borderColorElement->Attribute("B");
 			const char* A = borderColorElement->Attribute("A");
 
-			char Rc = (char)atoi(R);
-			char Gc = (char)atoi(G);
-			char Bc = (char)atoi(B);
-			char Ac;
+			unsigned char Rc = (unsigned char)atoi(R);
+			unsigned char Gc = (unsigned char)atoi(G);
+			unsigned char Bc = (unsigned char)atoi(B);
+			unsigned char Ac = '0';
 
 			if (!A)
 				Ac = 255;
@@ -275,10 +275,10 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 			const char* B = bgColorElement->Attribute("B");
 			const char* A = bgColorElement->Attribute("A");
 
-			char Rc = (char)atoi(R);
-			char Gc = (char)atoi(G);
-			char Bc = (char)atoi(B);
-			char Ac;
+			unsigned char Rc = (unsigned char)atoi(R);
+			unsigned char Gc = (unsigned char)atoi(G);
+			unsigned char Bc = (unsigned char)atoi(B);
+			unsigned char Ac = '0';
 
 			if (!A)
 				Ac = 255;
@@ -302,9 +302,9 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		}
 		else {
 			KeyFrameAnimation <float> fontSizeSeq;
-			float fontSize = atof(fontSizeElement->Attribute("value"));
+			float fontS = (float)atof(fontSizeElement->Attribute("value"));
 
-			fontSizeSeq.AddAnimationFrameAtParameter(fontSize, 0.f);
+			fontSizeSeq.AddAnimationFrameAtParameter(fontS, 0.f);
 			widgetAttributes.Set("text scale", fontSizeSeq);
 		}
 	}
@@ -320,11 +320,9 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		}
 		else {
 			KeyFrameAnimation <float> textOpacityAnim;
+			float textOpacityVal = (float)atof(textOpacityElement->Attribute("value"));
 
-			const TiXmlElement* textOpacityElement = textOpacity->ToElement();
-			float textOpacity = atof(textOpacityElement->Attribute("value"));
-
-			textOpacityAnim.AddAnimationFrameAtParameter(textOpacity, 0.f);
+			textOpacityAnim.AddAnimationFrameAtParameter(textOpacityVal, 0.f);
 			widgetAttributes.Set("text opacity", textOpacityAnim);
 		}
 	}
@@ -333,9 +331,9 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 		KeyFrameAnimation <std::string> textcontentsAnim;
 
 		const TiXmlElement* textContentsElement = textContents->ToElement();
-		const std::string textContents = textContentsElement->Attribute("value");
+		const std::string textContentsStr = textContentsElement->Attribute("value");
 
-		textcontentsAnim.AddAnimationFrameAtParameter(textContents, 0.f);
+		textcontentsAnim.AddAnimationFrameAtParameter(textContentsStr, 0.f);
 		widgetAttributes.Set("text", textcontentsAnim);
 	}
 
@@ -355,10 +353,10 @@ NamedProperties WidgetStyle::ExtractWidgetAttributesFromStateDefinition(const Ti
 			const char* B = innerColorElement->Attribute("B");
 			const char* A = innerColorElement->Attribute("A");
 
-			char Rc = (char)atoi(R);
-			char Gc = (char)atoi(G);
-			char Bc = (char)atoi(B);
-			char Ac;
+			unsigned char Rc = (unsigned char)atoi(R);
+			unsigned char Gc = (unsigned char)atoi(G);
+			unsigned char Bc = (unsigned char)atoi(B);
+			unsigned char Ac = '0';
 
 			if (!A)
 				Ac = 255;
@@ -501,7 +499,7 @@ void WidgetStyle::ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const T
 		if (!A)
 			A = "255";
 
-		colorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), atof(time));
+		colorSeq.AddAnimationFrameAtParameter(RGBA(Rc, Gc, Bc, Ac), (float)atof(time));
 	}
 }
 
@@ -512,7 +510,7 @@ void WidgetStyle::ParseVec2Animation(KeyFrameAnimation<Vec2>& vec2Seq, const TiX
 	const char* y = animationElement->Attribute("Y");
 	const char* time = animationElement->Attribute("time");
 
-	vec2Seq.AddAnimationFrameAtParameter(Vec2(atof(x), atof(y)), atof(time));
+	vec2Seq.AddAnimationFrameAtParameter(Vec2((float)atof(x), (float)atof(y)),(float)atof(time));
 }
 
 void WidgetStyle::MergeStyle(WidgetStyle* tempStyle)

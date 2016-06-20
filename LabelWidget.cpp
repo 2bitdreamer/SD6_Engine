@@ -82,6 +82,8 @@ void LabelWidget::Render()
 
 Vec2 LabelWidget::GetTextLowerLeft(const std::string& text, float cellSize)
 {
+	(void)cellSize;
+	(void)text;
 	Vec2 worldPos = GetWorldPosition();
 	return worldPos;
 }

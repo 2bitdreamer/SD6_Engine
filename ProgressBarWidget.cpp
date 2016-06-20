@@ -68,8 +68,8 @@ void ProgressBarWidget::Render()
 	GetPropertyForCurrentState("color", backgroundColor);
 	GetPropertyForCurrentState("inner color", innerColor);
 
-	backgroundColor.a() *= opacity;
-	innerColor.a() *= opacity;
+	backgroundColor.a() *= static_cast<unsigned char>(backgroundColor.a() * opacity);
+	innerColor.a() = static_cast<unsigned char>(innerColor.a() * opacity);
 
 
 	RenderBackground(worldPos, size, backgroundColor);

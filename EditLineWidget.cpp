@@ -2,14 +2,18 @@
 #include <algorithm>
 #include "LabelWidget.hpp"
 #include "Utilities\XMLFontRenderer.hpp"
+#include "SD7c\SD5\GameCode\theGame.hpp"
 
 #undef max
 
-EditLineWidget::EditLineWidget() 
+EditLineWidget::EditLineWidget()
 	: LabelWidget(),
 	m_cursorIndex(0),
 	m_leftmostCharacterIndex(0),
-	m_currentBlinkTimeSeconds(0.0)
+	m_rightmostCharacterIndex(0),
+	m_currentBlinkTimeSeconds(0.0),
+	m_largeCharSize(0.0f),
+	m_canType(false)
 {
 	SetStaticPropertyForState("text", UI_STATE_ALL, std::string(""));
 	SetStaticPropertyForState("size", UI_STATE_ALL, Vec2(500.f, 50.f));
@@ -49,7 +53,7 @@ void EditLineWidget::Render()
 	double time;
 	GetPropertyForCurrentState("blink time", time);
 
-	if (m_currentBlinkTimeSeconds >= time) {
+	if ((m_currentBlinkTimeSeconds >= time) && m_canType) {
 		Vec2 cursorSize = Vec2(1.f, textScale * 5.f);
 		if (m_cursorIndex == 0) {
 			RenderBackground(worldPos, cursorSize, cursorColor);
@@ -75,108 +79,176 @@ void EditLineWidget::Update(double deltaTimeSeconds)
 
 
 	if (m_firstUpdate) {
-		
+		m_largeCharSize = m_fontRenderer->CalcTextWidth("Q", textScale * 5.f);
 		SetStaticPropertyForState("text scale", UI_STATE_ALL, size.y() * .2f);
 		m_firstUpdate = false;
 	}
-
-
-// 	while (m_fontRenderer->CalcTextWidth(m_fullText.substr(m_leftmostCharacterIndex, m_fullText.size()), textScale * 5.f) > size.x()) {
-// 		m_leftmostCharacterIndex++;x
-// 	}
-
-	std::string rightOfCursor = m_fullText.substr(m_cursorIndex, m_fullText.size() - m_cursorIndex + 1);
-	int rightmostIndex = 0;
-
-	if (m_fontRenderer->CalcTextWidth(rightOfCursor, textScale * 5.f) > size.x()) {
-		int additional = 0;
-		while (((m_cursorIndex + additional) <= m_fullText.size()) && (m_fontRenderer->CalcTextWidth(m_fullText.substr(m_cursorIndex, additional + 1), textScale * 5.f) < size.x())) {
-			additional++;
-		}
-		if (additional == 0)
-			rightmostIndex = m_cursorIndex;
-		else
-			rightmostIndex = m_cursorIndex + additional;
+	if (!(m_fullText.size() == 0))
+	{
+		std::string curText = m_fullText.substr(m_leftmostCharacterIndex,
+			m_rightmostCharacterIndex - m_leftmostCharacterIndex + 1);
+		SetStaticPropertyForState("text", UI_STATE_ALL, curText);
 	}
-	else {	
-		rightmostIndex = m_fullText.size() - 1;
-		int additional = 0;
-		while (((m_cursorIndex - additional) > 0) && (m_fontRenderer->CalcTextWidth(m_fullText.substr(m_cursorIndex - additional, rightmostIndex - (m_cursorIndex - additional) + 1), textScale * 5.f) < size.x())) {
-			additional++;
-		}
-		if (additional == 0)
-			m_leftmostCharacterIndex = m_cursorIndex;
-		else
-			m_leftmostCharacterIndex = m_cursorIndex - additional;
-	}
-
-	SetStaticPropertyForState("text", UI_STATE_ALL, m_fullText.substr(m_leftmostCharacterIndex, rightmostIndex - m_leftmostCharacterIndex + 1));
 	LabelWidget::Update(deltaTimeSeconds);
+	
+	if (m_canType)
+	{
+		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) {
+			POINT point;
+			GetCursorPos(&point);
+			ScreenToClient(GetActiveWindow(), &point);
+			Vec2 mouseCoord = Vec2((float)point.x, (float)(SCREEN_HEIGHT - point.y));
+			Vec2 offset;
+			GetPropertyForCurrentState("offset", offset);
+			Vec2 maxBounds = offset + size;
+			if (!(offset.x() <= mouseCoord.x() && offset.y() <= mouseCoord.y() && mouseCoord.x() <= maxBounds.x() && mouseCoord.y() <= maxBounds.y())) {
+				m_canType = false;
+			}
+		}
+		m_currentBlinkTimeSeconds += deltaTimeSeconds;
+	}
 
-	m_currentBlinkTimeSeconds += deltaTimeSeconds;
 }
 
 void EditLineWidget::OnMouseFocusEvent(MouseEvent me)
 {
+	if (m_currentState == UI_STATE_DISABLED)
+		return;
+
+	if (me.m_mouseEventType == LEFT_BUTTON_DOWN) {
+		SwitchState(UI_STATE_PRESSED);
+		m_canType = true;
+	}
+	else if (me.m_mouseEventType == LEFT_BUTTON_UP && m_currentState == UI_STATE_PRESSED) { //BUTTON CLICK
+		std::string eventToFire;
+		GetPropertyForCurrentState("click event", eventToFire);
+		FireEvent(eventToFire);
+		SwitchState(UI_STATE_HIGHLIGHTED);
+	}
+	else if (me.m_mouseEventType == MOVED && (GetKeyState(VK_LBUTTON) & 0x100) == 0) { //On the button, but not clicking
+		SwitchState(UI_STATE_HIGHLIGHTED);
+	}
 	LabelWidget::OnMouseFocusEvent(me);
 }
 
 void EditLineWidget::OnMouseUnfocusEvent(MouseEvent me)
 {
+	if (m_currentState == UI_STATE_DISABLED)
+		return;
+
+	if (me.m_mouseEventType == LEFT_BUTTON_UP) { // Not on the button, released 
+		SwitchState(UI_STATE_DEFAULT);
+	}
+
+	if (me.m_mouseEventType == MOVED && m_currentState != UI_STATE_PRESSED) { //Not on the button, moved
+		SwitchState(UI_STATE_DEFAULT);
+	}
+
 	LabelWidget::OnMouseUnfocusEvent(me);
 }
 
 void EditLineWidget::OnKeyBoardEvent(unsigned char theKey)
 {
-	std::string aStr;
-	double time;
-	GetPropertyForCurrentState("blink time", time);
+	if (m_canType)
+	{
+		TheGame& game = TheGame::GetInstance();
+		if ((game.m_keyStates[VK_UP].m_isPressed) || (game.m_keyStates[VK_DOWN].m_isPressed))
+		{
+			return;
+		}
+		std::string aStr;
+		double time;
+		GetPropertyForCurrentState("blink time", time);
 
-	Vec2 size;
-	GetPropertyForCurrentState("size", size);
+		Vec2 size;
+		GetPropertyForCurrentState("size", size);
 
-	float textScale;
-	GetPropertyForCurrentState("text scale", textScale);
+		float textScale;
+		GetPropertyForCurrentState("text scale", textScale);
 
-	if (theKey == VK_BACK && !m_fullText.empty()) {
-		m_cursorIndex--;
-		if (m_fullText.size() == 1)
-			m_fullText = std::string("");
+		float textBoundary = size.x() - m_largeCharSize;
+		float textScreenSize = m_fontRenderer->CalcTextWidth(m_fullText, textScale * 5.f);
+
+
+		if (game.m_keyStates[VK_LEFT].m_isPressed)
+		{
+			if (m_cursorIndex > 0) {
+				m_cursorIndex--;
+				m_currentBlinkTimeSeconds = time * 1.5;
+				if ((textScreenSize > textBoundary) && (m_leftmostCharacterIndex > 0)
+					&& (m_cursorIndex < m_leftmostCharacterIndex))
+				{
+					m_leftmostCharacterIndex--;
+					m_rightmostCharacterIndex--;
+				}
+			}
+		}
+		else if (game.m_keyStates[VK_RIGHT].m_isPressed)
+		{
+			if (m_cursorIndex < m_fullText.size()) {
+				m_cursorIndex++;
+				m_currentBlinkTimeSeconds = time * 1.5;
+				if ((textScreenSize > textBoundary) && (m_rightmostCharacterIndex < (textScreenSize - 1))
+					&& (m_cursorIndex > m_rightmostCharacterIndex))
+				{
+					m_leftmostCharacterIndex++;
+					m_rightmostCharacterIndex++;
+				}
+			}
+		}
+		else if (theKey == VK_BACK && !m_fullText.empty()) {
+			if (m_cursorIndex != 0)
+			{
+				m_cursorIndex--;
+				if (m_fullText.size() <= 1)
+				{
+					m_fullText = std::string("");
+					m_leftmostCharacterIndex = 0;
+					m_rightmostCharacterIndex = 0;
+				}
+
+				else
+				{
+					m_fullText.erase(m_fullText.begin() + m_cursorIndex);
+					aStr = m_fullText;
+					if ((textScreenSize > textBoundary && (m_leftmostCharacterIndex > 0)))
+						m_leftmostCharacterIndex--;
+					//m_rightmostCharacterIndex++;
+					m_rightmostCharacterIndex--;
+				}
+			}
+		}
 		else
-			aStr = m_fullText.substr(0, m_fullText.size() - 1);
-	}
-
-	if (theKey == VK_LEFT && m_cursorIndex > 0) {
-		m_cursorIndex--;
-	}
-	else if (theKey != VK_LEFT && theKey != VK_RIGHT) {
-		std::stringstream addStr;
-		if (isalnum(theKey) || ispunct(theKey)) {
+		{
+			std::stringstream addStr;
 			addStr << theKey;
 
 			m_fullText.insert(m_cursorIndex, addStr.str());
 			m_currentBlinkTimeSeconds = time * 1.5;
 			m_cursorIndex++;
-		}
-	}
-	else if (m_cursorIndex < m_fullText.size()) {
-		if (theKey != VK_RIGHT && theKey != VK_LEFT) {
-			std::stringstream addStr;
-			if (isalnum(theKey) || ispunct(theKey)) {
-				addStr << theKey;
-				m_fullText.insert(m_cursorIndex, addStr.str());
-				m_currentBlinkTimeSeconds = time * 1.5;
-				m_cursorIndex++;
+			if (textScreenSize > textBoundary)
+			{
+				if (m_cursorIndex == (m_rightmostCharacterIndex + 1))
+				{
+					m_leftmostCharacterIndex++;
+					m_rightmostCharacterIndex++;
+				}
+				else
+				{
+					//m_rightmostCharacterIndex--;
+				}
+
+			}
+			else
+			{
+				m_rightmostCharacterIndex++;
 			}
 		}
-		else if (theKey == VK_RIGHT) {
-			m_cursorIndex++;
-		}
-	}
 
-	if (!aStr.empty())
-	{
-		m_fullText = aStr;
+		if (!aStr.empty())
+		{
+			m_fullText = aStr;
+		}
 	}
 }
 

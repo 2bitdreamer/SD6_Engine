@@ -290,8 +290,8 @@ inline std::string Interpolate(const std::string& start, const std::string& end,
 	size_t endSize = end.size();
 
 	float fractionStart = 1.f - fractionComplete;
-	size_t startIndex = startSize * fractionStart;
-	size_t endIndex = endSize * fractionComplete;
+	size_t startIndex = (size_t)(startSize * fractionStart);
+	size_t endIndex = (size_t)(endSize * fractionComplete);
 
 	std::string startString = start.substr(0, startIndex);
 	std::string endString = end.substr(0, endIndex);
@@ -306,10 +306,13 @@ inline T Interpolate(const T& start, const T& end, float fractionComplete) {
 
 
 inline CardinalDir Interpolate(const CardinalDir& start, const CardinalDir& end, float fractionComplete) {
+	(void)end;
+	(void)fractionComplete;
 	return start;
 }
 
 inline std::vector<std::string> Interpolate(const std::vector<std::string>& start, const std::vector<std::string>& end, float fractionComplete) {
+	(void)fractionComplete;
 	if (!start.empty())
 		return start;
 	else
@@ -319,6 +322,8 @@ inline std::vector<std::string> Interpolate(const std::vector<std::string>& star
 
 template <>
 inline bool Interpolate<bool>(const bool& start, const bool& end, float fractionComplete) {
+	(void)start;
+	(void)end;
 	if (fractionComplete >= 0.5f)
 		return true;
 	else

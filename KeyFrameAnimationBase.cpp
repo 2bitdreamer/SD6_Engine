@@ -15,12 +15,12 @@ KeyFrameAnimationBase::~KeyFrameAnimationBase()
 bool KeyFrameAnimationBase::IsLooping()
 {
 	FATAL_ERROR("Function should never be called");
-	return false;
 }
 
 void KeyFrameAnimationBase::SetAnimationTime(float time)
 {
 	FATAL_ERROR("Function should never be called");
+	(void)time;
 }
 
 float KeyFrameAnimationBase::GetAnimationTime() {

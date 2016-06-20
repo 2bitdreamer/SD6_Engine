@@ -75,13 +75,13 @@ void CheckBoxWidget::Render()
 	RGBA innerColor;
 	GetPropertyForCurrentState("color", backgroundColor);
 	
-	backgroundColor.a() *= opacity;
+	backgroundColor.a() = static_cast<unsigned char>(backgroundColor.a() * opacity);
 	
 	RenderBackground(worldPos, size, backgroundColor);
 
 	if (IsChecked()) {
 		GetPropertyForCurrentState("inner color", innerColor);
-		innerColor.a() *= opacity;
+		innerColor.a() = static_cast<unsigned char>(innerColor.a() * opacity);
 
 		RenderBackground(worldPos + (size * 0.25f), size * 0.5f, innerColor);
 	}

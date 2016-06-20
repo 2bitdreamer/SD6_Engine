@@ -30,6 +30,8 @@ void GroupWidget::Render()
 
 void GroupWidget::OnMouseEvent(MouseEvent me) {
 	//Has click-through problem
+	if (m_currentState == UI_STATE_DISABLED)
+		return;
 
 	Vec2 mouseCoord = me.m_cursorPos;
 	for (auto& wb : m_children) {
@@ -64,7 +66,6 @@ void GroupWidget::OnMouseEvent(MouseEvent me) {
 			}
 		}
 	}
-
 }
 
 

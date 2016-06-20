@@ -33,11 +33,11 @@ void SliderWidget::Render()
 
 	RGBA backgroundColor;
 	GetPropertyForCurrentState("color", backgroundColor);
-	backgroundColor.a() *= opacity;
+	backgroundColor.a() = static_cast<unsigned char>(backgroundColor.a() * opacity);
 
 	RGBA handleColor;
 	GetPropertyForCurrentState("handle color", handleColor);
-	handleColor.a() *= opacity;
+	handleColor.a() = static_cast<unsigned char>(handleColor.a() * opacity);
 
 	bool isHorizontal;
 	GetPropertyForCurrentState("is horizontal", isHorizontal);
@@ -75,7 +75,7 @@ void SliderWidget::Update(double deltaTimeSeconds)
 	POINT point;
 	GetCursorPos(&point);
 	ScreenToClient(GetActiveWindow(), &point);
-	Vec2 pos = Vec2(point.x, SCREEN_HEIGHT - point.y);
+	Vec2 pos = Vec2((float)point.x, (float)(SCREEN_HEIGHT - point.y));
 
 
 	float handleSizeFraction;
@@ -315,13 +315,6 @@ void SliderWidget::OnMouseUnfocusEvent(MouseEvent me)
 	GetPropertyForCurrentState("size", size);
 	m_worldPosition = GetWorldPosition();
 
-	float minX = m_worldPosition.x();
-	float maxX = m_worldPosition.x() + size.x();
-	float minY = m_worldPosition.y();
-	float maxY = m_worldPosition.y() + size.y();
-
-	bool inOuterBounds = (pos.x() >= minX && pos.x() <= maxX && pos.y() >= minY && pos.y() <= maxY);
-
 	if (me.m_mouseEventType == LEFT_BUTTON_UP) {
 		m_continousFire = false;
 		m_firingRateTracker = 0.0;
@@ -353,7 +346,7 @@ void SliderWidget::UpdateHandleSizeFrac()
 {
 	bool isHorizontal;
 	GetPropertyForCurrentState("is horizontal", isHorizontal);
-	float frac;
+
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
 	if (isHorizontal)

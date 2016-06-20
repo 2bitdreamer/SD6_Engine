@@ -51,6 +51,8 @@ ScrollbarWidget::~ScrollbarWidget()
 
 void ScrollbarWidget::IncrementEvent(NamedProperties& np)
 {
+	(void)np;
+
 	bool isHorizontal;
 	GetPropertyForCurrentState("is horizontal", isHorizontal);
 
@@ -76,6 +78,7 @@ void ScrollbarWidget::IncrementEvent(NamedProperties& np)
 
 void ScrollbarWidget::DecrementEvent(NamedProperties& np)
 {
+	(void)np;
 	bool isHorizontal;
 	GetPropertyForCurrentState("is horizontal", isHorizontal);
 

@@ -24,6 +24,9 @@ protected:
 	std::string m_fullText;
 	bool m_firstUpdate;
 	int m_leftmostCharacterIndex;
+	int m_rightmostCharacterIndex;
+	float m_largeCharSize;
 	double m_currentBlinkTimeSeconds;
+	bool m_canType;
 };
 

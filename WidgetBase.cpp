@@ -85,7 +85,7 @@ void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor)
 
 
 void WidgetBase::OnMouseFocusEvent(MouseEvent me) {
-
+	(void)me;
 }
 
 Vec2 WidgetBase::GetWorldPosition()
@@ -153,7 +153,8 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& widgetSize, flo
 	Vertex baseOutlineVertex;
 	Vertex outlineVertices[4];
 	GetPropertyForCurrentState("border color", edgeColor);
-	edgeColor.a() *= opacity;
+
+	edgeColor.a() = static_cast<unsigned char>(edgeColor.a() * opacity);
 
 	baseOutlineVertex.m_color = edgeColor;
 
@@ -224,8 +225,8 @@ void WidgetBase::ApplyGeneralStyleToAll(WidgetStyle* baseStyle)
 	State st = it->first;
 	const NamedProperties& np = it->second;
 
-	for (UIState st = UI_STATE_DEFAULT; st < NUM_UI_STATES; st = (UIState)(st + 1)) {
-		CopyStatePropertyToWidget(st, np);
+	for (UIState sta = UI_STATE_DEFAULT; sta < NUM_UI_STATES; sta = (UIState)(sta + 1)) {
+		CopyStatePropertyToWidget(sta, np);
 	}
 }
 
@@ -254,11 +255,12 @@ void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
 
 void WidgetBase::OnKeyBoardEvent(unsigned char theKey)
 {
-	
+	(void)theKey;
 }
 
 void WidgetBase::OnMouseUnfocusEvent(MouseEvent me)
 {
+	(void)me;
 }
 
 void WidgetBase::Render()
@@ -269,7 +271,7 @@ void WidgetBase::Render()
 
 	RGBA backgroundColor;
 	GetPropertyForCurrentState("color", backgroundColor);
-	backgroundColor.a() *= opacity;
+	backgroundColor.a() = static_cast<unsigned char>(backgroundColor.a() * opacity);
 
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
