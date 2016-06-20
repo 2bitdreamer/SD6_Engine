@@ -31,33 +31,40 @@ void GroupWidget::Render()
 void GroupWidget::OnMouseEvent(MouseEvent me) {
 	//Has click-through problem
 
-	Vec2 convertedMouseCoord = Vec2(me.m_cursorPos.x(), me.m_cursorPos.y());
+	Vec2 mouseCoord = me.m_cursorPos;
 	for (auto& wb : m_children) {
-		 
+
 		if (wb->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
 			continue;
 
-		Vec2 size;
-		Vec2 wp = wb->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
-
-		wb->GetPropertyForCurrentState("size", size);
-
-		Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
-
-		if (wp.x() <= convertedMouseCoord.x() && wp.y() <= convertedMouseCoord.y() && convertedMouseCoord.x() <= maxBounds.x() && convertedMouseCoord.y() <= maxBounds.y()) {
-
-			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) {
-				std::string eventToFire;
-				wb->GetPropertyForCurrentState("pressed event", eventToFire);
-				FireEvent(eventToFire);
-			}
-
-			wb->OnMouseFocusEvent(me);
+		GroupWidget* asGW = dynamic_cast<GroupWidget*>(wb);
+		if (asGW) {
+			asGW->OnMouseEvent(me);
 		}
-		else if (wb->m_currentState != UI_STATE_DEFAULT) {
-			wb->OnMouseUnfocusEvent(me);
+		else {
+			Vec2 size;
+			Vec2 wp = wb->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
+
+			wb->GetPropertyForCurrentState("size", size);
+
+			Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
+
+			if (wp.x() <= mouseCoord.x() && wp.y() <= mouseCoord.y() && mouseCoord.x() <= maxBounds.x() && mouseCoord.y() <= maxBounds.y()) {
+
+				if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) {
+					std::string eventToFire;
+					wb->GetPropertyForCurrentState("pressed event", eventToFire);
+					FireEvent(eventToFire);
+				}
+
+				wb->OnMouseFocusEvent(me);
+			}
+			else if (wb->m_currentState != UI_STATE_DEFAULT) {
+				wb->OnMouseUnfocusEvent(me);
+			}
 		}
 	}
+
 }
 
 
