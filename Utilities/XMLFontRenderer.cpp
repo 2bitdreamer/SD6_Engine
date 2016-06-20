@@ -64,6 +64,8 @@ void XMLFontRenderer::LoadFont(const char* pFilename)
 float XMLFontRenderer::CalcTextWidth(const std::string& text, float height) {
 
 	Vec2 cursor = Vec2(0.f, 0.f);
+	if (text.empty())
+		return 0.f;
 
 	float ratio = height/m_charset.LineHeight;
 	for( size_t i = 0; i < text.length(); ++i )

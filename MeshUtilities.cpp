@@ -14,6 +14,7 @@ TriangleMesh* CreateNewMeshFromModelName(const std::string& modelName) {
 	Material* modelMaterial = CreateNewMaterialFromModelName(modelName);
 	TriangleMesh* tMesh = new TriangleMesh(modelMaterial);
 	std::string c23path = GetPathForModelName(modelName) + modelName + ".c23";
+	c23path.remove(c23path.find());
 
 	std::vector<Vertex> vertexList;
 	std::vector<unsigned int> indexList;

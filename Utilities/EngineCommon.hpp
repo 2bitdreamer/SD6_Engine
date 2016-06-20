@@ -88,6 +88,7 @@ enum UIState {
 	UI_STATE_DEFAULT,
 	UI_STATE_HIGHLIGHTED,
 	UI_STATE_PRESSED,
+	UI_STATE_HIDDEN,
 	UI_STATE_DISABLED,
 	UI_STATE_ALL,
 	NUM_UI_STATES
@@ -98,7 +99,8 @@ enum MouseEventType {
 	LEFT_BUTTON_UP,
 	RIGHT_BUTTON_DOWN,
 	RIGHT_BUTTON_UP,
-	MOVED
+	MOVED,
+	NONE
 };
 
 struct MouseEvent {
@@ -261,12 +263,6 @@ inline std::string GetDiffuseTexturePathForModelName(const std::string& modelToL
 }
 
 
-template <typename T>
-inline T Interpolate(const T& start, const T& end, float fractionComplete) {
-	return (T)(start * (1.f - fractionComplete)) + (end * fractionComplete);
-}
-
-
 inline int Interpolate(const int& start, const int& end, float fractionComplete) {
 	int numSlots = 1 + end - start;
 	float parametricPerSlot = 1.f / (float)numSlots;
@@ -287,6 +283,8 @@ inline RGBA Interpolate(const RGBA& start, const RGBA& end, float fractionComple
 	return interpRGBA;
 }
 
+
+
 inline std::string Interpolate(const std::string& start, const std::string& end, float fractionComplete) {
 	size_t startSize = start.size();
 	size_t endSize = end.size();
@@ -299,6 +297,32 @@ inline std::string Interpolate(const std::string& start, const std::string& end,
 	std::string endString = end.substr(0, endIndex);
 
 	return (startString + endString);
+}
+
+template <typename T>
+inline T Interpolate(const T& start, const T& end, float fractionComplete) {
+	return (T)(start * (1.f - fractionComplete)) + (end * fractionComplete);
+}
+
+
+inline CardinalDir Interpolate(const CardinalDir& start, const CardinalDir& end, float fractionComplete) {
+	return start;
+}
+
+inline std::vector<std::string> Interpolate(const std::vector<std::string>& start, const std::vector<std::string>& end, float fractionComplete) {
+	if (!start.empty())
+		return start;
+	else
+		return end;
+}
+
+
+template <>
+inline bool Interpolate<bool>(const bool& start, const bool& end, float fractionComplete) {
+	if (fractionComplete >= 0.5f)
+		return true;
+	else
+		return false;
 }
 
 template <typename T>

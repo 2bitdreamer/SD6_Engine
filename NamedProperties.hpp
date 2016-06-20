@@ -3,11 +3,19 @@
 #include <typeinfo.h>
 #include <string>
 #include "Assert.hpp"
+#include <type_traits>
+#include "KeyFrameAnimationBase.hpp"
 
 class TypedPropertyBase {
 public:
 	virtual bool IsOfType(const type_info& compareType) = 0;
 	virtual TypedPropertyBase* Clone() = 0;
+
+	virtual void* GetData() {
+		return nullptr;
+	}
+
+	virtual bool IsAnim() = 0;
 };
 
 enum PropertyGetResult {
@@ -45,6 +53,16 @@ public:
 	template <typename T> T& Get(std::string const & name);
 	NamedProperties(const NamedProperties& np);
 
+	bool Contains(const std::string& name) {
+		return m_properties.find(name) != m_properties.end();
+	}
+
+	void Merge(NamedProperties& np) {
+		auto& mapRef = np.GetPropertyMap();
+		for (auto& it : mapRef) {
+			m_properties[it.first] = it.second;
+		}
+	}
 
 private:
 	std::map<std::string, TypedPropertyBase*> m_properties;
@@ -66,6 +84,14 @@ public:
 	virtual bool IsOfType(const type_info& compareType) {
 		const type_info& myType = typeid(m_propertyValue);
 		return (myType == compareType);
+	}
+
+	virtual bool IsAnim() {
+		return std::is_base_of<KeyFrameAnimationBase, T_PropertyType>::value;
+	}
+
+	virtual void* GetData() {
+		return &m_propertyValue;
 	}
 
 	T_PropertyType m_propertyValue;
@@ -121,7 +147,7 @@ void NamedProperties::Set(const std::string& propertyName, const T& propertyValu
 }
 
 template <typename T_PropertyType>
-T_PropertyType& NamedProperties::Get(std::string const & propertyName) {
+T_PropertyType& NamedProperties::Get(const std::string& propertyName) {
 
 	bool error = false;
 	if (m_properties.empty())
@@ -132,8 +158,13 @@ T_PropertyType& NamedProperties::Get(std::string const & propertyName) {
 		error = true;
 
 	TypedPropertyBase* baseProperty = found->second;
-	if (!baseProperty->IsOfType(typeid(T_PropertyType)))
-		error = true;
+
+	bool isTypeAnim = typeid(T_PropertyType) == typeid(KeyFrameAnimationBase); //Are we looking for an animation?
+	bool isAnim = baseProperty->IsAnim(); //Is this an animation?
+	bool isGoodAnim = isAnim && isTypeAnim;
+
+	if (!baseProperty->IsOfType(typeid(T_PropertyType)) && !isGoodAnim)
+   		error = true;
 
 	FATAL_ASSERT(!error);
 
@@ -141,6 +172,8 @@ T_PropertyType& NamedProperties::Get(std::string const & propertyName) {
 	T_PropertyType& propertyValue = theTypedProperty->m_propertyValue;
 	return propertyValue;
 }
+
+
 
 template<typename T_PropertyType>
 PropertyGetResult NamedProperties::Get(const std::string propertyName, T_PropertyType& out_propertyValue) const

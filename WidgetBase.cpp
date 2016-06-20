@@ -3,22 +3,38 @@
 #include "UISystem.hpp"
 #include "WidgetStyle.hpp"
 #include <functional>
+#include <vcruntime_typeinfo.h>
+#include "KeyFrameAnimationBase.hpp"
+
+int WidgetBase::s_currentID;
 
 WidgetBase::WidgetBase() :
 	m_parentWidget(nullptr),
 	m_currentState(UI_STATE_DEFAULT)
 {
 	//#TODO: should probably have different defaults for different states.
-	SetPropertyForState("offset", UI_STATE_ALL, Vec2(0.f, 0.f));
-	SetPropertyForState("size", UI_STATE_ALL, Vec2(100.f, 50.f));
-	SetPropertyForState("border color", UI_STATE_ALL, RGBA(200, 200, 200, 255));
-	SetPropertyForState("border size", UI_STATE_ALL, 5.f);
-	SetPropertyForState("opacity", UI_STATE_ALL, 1.f);
-	SetPropertyForState("color", UI_STATE_ALL, RGBA(255, 255, 255, 255));
+	AddPropertyForState("offset", UI_STATE_ALL, Vec2(0.f, 0.f));
+	AddPropertyForState("size", UI_STATE_ALL, Vec2(200.f, 125.f));
+	AddPropertyForState("border color", UI_STATE_ALL, RGBA(50, 50, 50, 255));
+	AddPropertyForState("border size", UI_STATE_ALL, 5.f);
+	AddPropertyForState("opacity", UI_STATE_ALL, 1.f);
+	AddPropertyForState("color", UI_STATE_ALL, RGBA(255, 255, 255, 255));
+	AddPropertyForState("name", UI_STATE_ALL, GetNextDecrementID());
+
+	SetStaticPropertyForState("color", UI_STATE_DISABLED, RGBA(100, 100, 100, 255));
+
 }
 
 WidgetBase::~WidgetBase()
 {
+}
+
+std::string WidgetBase::GetNextDecrementID() {
+	int nextID = WidgetBase::s_currentID;
+	std::stringstream ss;
+	ss << "Widget" << nextID;
+	s_currentID++;
+	return ss.str();
 }
 
 std::string WidgetBase::GetNameForState(UIState state) {
@@ -69,7 +85,7 @@ void WidgetBase::ApplyWidgetProperties(const NamedProperties& widgetDescriptor)
 
 
 void WidgetBase::OnMouseFocusEvent(MouseEvent me) {
-	
+
 }
 
 Vec2 WidgetBase::GetWorldPosition()
@@ -101,7 +117,31 @@ void WidgetBase::Update(double deltaTimeSeconds)
 	UpdateProperty<Vec2>("offset", deltaTimeFloat);
 	UpdateProperty<float>("opacity", deltaTimeFloat);
 	UpdateProperty<float>("border size", deltaTimeFloat);
+
+	ProcessUpdateEvent();
 }
+
+void WidgetBase::ProcessUpdateEvent() {
+	std::vector<std::string> updateEvent;
+	GetPropertyForCurrentState("update event", updateEvent);
+	if (!updateEvent.empty()) {
+		for (auto it = updateEvent.begin(); it != updateEvent.end(); ++it) {
+			FireEvent(*it);
+		}
+	}
+}
+
+void WidgetBase::ProcessRenderEvent() {
+	std::vector<std::string> renderEvent;
+	GetPropertyForCurrentState("render event", renderEvent);
+	if (!renderEvent.empty()) {
+		for (auto it = renderEvent.begin(); it != renderEvent.end(); ++it) {
+			FireEvent(*it);
+		}		
+	}
+}
+
+
 
 void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& widgetSize, float lineWidth)
 {
@@ -137,16 +177,10 @@ void WidgetBase::RenderOutline(const Vec2& worldPos, const Vec2& widgetSize, flo
 	glPopAttrib();
 }
 
-void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
+void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size, const RGBA& backgroundColor)
 {
 	Vertex baseVertex;
 	Vertex verticesToRender[4];
-
-	float opacity = GetOpacity();
-
-	RGBA backgroundColor;
-	GetPropertyForCurrentState("color", backgroundColor);
-	backgroundColor.a() *= opacity;
 
 	baseVertex.m_color = backgroundColor;
 
@@ -169,14 +203,23 @@ void WidgetBase::RenderBackground(const Vec2& worldPos, const Vec2& size)
 	renderer.RenderPrimitives(GL_QUADS, verticesToRender, 4);
 }
 
-WidgetBase* WidgetBase::Create()
+WidgetBase* WidgetBase::Create(const TiXmlNode* data)
 {
-	return new WidgetBase();
+	WidgetBase* wb = new WidgetBase();
+	wb->ParseAndAddEvents(data);
+	return wb;
 }
 
 void WidgetBase::ApplyGeneralStyleToAll(WidgetStyle* baseStyle)
 {
+	if (!baseStyle)
+		return;
+
 	auto properties = baseStyle->GetProperties();
+
+	if (properties.empty())
+		return;
+
 	auto it = properties.begin();
 	State st = it->first;
 	const NamedProperties& np = it->second;
@@ -188,6 +231,9 @@ void WidgetBase::ApplyGeneralStyleToAll(WidgetStyle* baseStyle)
 
 void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
 {
+	if (!baseStyle)
+		return;
+
 	auto properties = baseStyle->GetProperties();
 
 	bool first = true;
@@ -206,14 +252,24 @@ void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
 	}
 }
 
+void WidgetBase::OnKeyBoardEvent(unsigned char theKey)
+{
+	
+}
+
 void WidgetBase::OnMouseUnfocusEvent(MouseEvent me)
 {
-
 }
 
 void WidgetBase::Render()
 {
 	Vec2 worldPos = GetWorldPosition();
+
+	float opacity = GetOpacity();
+
+	RGBA backgroundColor;
+	GetPropertyForCurrentState("color", backgroundColor);
+	backgroundColor.a() *= opacity;
 
 	Vec2 size;
 	GetPropertyForCurrentState("size", size);
@@ -221,8 +277,66 @@ void WidgetBase::Render()
 	float borderSize;
 	GetPropertyForCurrentState("border size", borderSize);
 
-	RenderBackground(worldPos, size);
+	RenderBackground(worldPos, size, backgroundColor);
 	RenderOutline(worldPos, size, borderSize);
+}
+
+
+void WidgetBase::SwitchState(UIState newState)
+{
+	if (m_currentState == newState)
+		return;
+
+	if (m_currentState == UI_STATE_DISABLED && (newState == UI_STATE_HIGHLIGHTED || newState == UI_STATE_PRESSED)) //Don't let disabled buttons become highlighted or pressed
+		return;
+
+	NamedProperties& thisProp = m_stateProperties[newState];
+
+	auto& thisPropMap = thisProp.GetPropertyMap();
+
+	for (auto it = thisPropMap.begin(); it != thisPropMap.end(); ++it) {
+ 		const std::string name = it->first;
+ 		KeyFrameAnimationBase& kfa = thisProp.Get<KeyFrameAnimationBase>(name);
+ 
+  		if (!kfa.IsLooping()) {
+  			kfa.SetAnimationTime(0.f);
+  		}
+	}
+
+	std::vector<std::string> exitEvent;
+	GetPropertyForCurrentState("exit event", exitEvent);
+	if (!exitEvent.empty()) {
+		for (auto it = exitEvent.begin(); it != exitEvent.end(); ++it) {
+			FireEvent(*it);
+		}
+	}
+
+	m_currentState = newState;
+
+	std::vector<std::string> enterEvent;
+	GetPropertyForCurrentState("enter event", enterEvent);
+	if (!enterEvent.empty()) {
+		for (auto it = enterEvent.begin(); it != enterEvent.end(); ++it) {
+			FireEvent(*it);
+		}
+	}
+}
+
+void WidgetBase::ParseAndAddEvents(const TiXmlNode* data) {
+	if (data) {
+		const char* updateEventToFire = data->ToElement()->Attribute("OnUpdate");
+		const char* renderEventToFire = data->ToElement()->Attribute("OnRender");
+		const char* clickEventToFire = data->ToElement()->Attribute("OnClick");
+		if (updateEventToFire) {
+			SetStaticPropertyForState("update event", UI_STATE_ALL, SplitString(updateEventToFire, ","));
+		}
+		if (renderEventToFire) {
+			SetStaticPropertyForState("render event", UI_STATE_ALL, SplitString(renderEventToFire, ","));
+		}
+		if (clickEventToFire) {
+			SetStaticPropertyForState("click event", UI_STATE_PRESSED, SplitString(clickEventToFire, ","));
+		}
+	}
 }
 
 void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties& currentNP)
@@ -231,11 +345,19 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			KeyFrameAnimation<Vec2> size;
 			KeyFrameAnimation<RGBA> color;
 			KeyFrameAnimation<RGBA> edgeColor;
+			KeyFrameAnimation<RGBA> innerColor;
 			KeyFrameAnimation<float> borderSize;
 			KeyFrameAnimation<float> opacity;
 			KeyFrameAnimation<RGBA> textColor;
 			KeyFrameAnimation<float> textScale;
 			KeyFrameAnimation<float> textOpacity;
+			KeyFrameAnimation<float> duration;
+			KeyFrameAnimation<std::string> textContents;
+			KeyFrameAnimation<std::vector<std::string>> updateEvent;
+			KeyFrameAnimation<std::vector<std::string>> renderEvent;
+			KeyFrameAnimation<std::vector<std::string>> enterEvent;
+			KeyFrameAnimation<std::vector<std::string>> exitEvent;
+
 
 			PropertyGetResult ofr = currentNP.Get("offset", offset);
 			PropertyGetResult sr = currentNP.Get("size", size);
@@ -246,6 +368,13 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 			PropertyGetResult tc = currentNP.Get("text color", textColor);
 			PropertyGetResult ts = currentNP.Get("text scale", textScale);
 			PropertyGetResult to = currentNP.Get("text opacity", textOpacity);
+			PropertyGetResult tcon = currentNP.Get("text", textContents);
+			PropertyGetResult innerCol = currentNP.Get("inner color", innerColor);
+			PropertyGetResult updEv = currentNP.Get("update event", updateEvent);
+			PropertyGetResult renEv = currentNP.Get("render event", renderEvent);
+			PropertyGetResult enEv = currentNP.Get("enter event", enterEvent);
+			PropertyGetResult exEv = currentNP.Get("exit event", exitEvent);
+			PropertyGetResult dur = currentNP.Get("duration", duration);
 
 			if (ofr == RESULT_SUCCESS)
 				m_stateProperties[state].Set("offset", offset);
@@ -273,4 +402,25 @@ void WidgetBase::CopyStatePropertyToWidget(UIState state, const NamedProperties&
 
 			if (to == RESULT_SUCCESS)
 				m_stateProperties[state].Set("text opacity", textOpacity);
+
+			if (tcon == RESULT_SUCCESS)
+				m_stateProperties[state].Set("text", textContents);
+
+			if (innerCol == RESULT_SUCCESS)
+				m_stateProperties[state].Set("inner color", innerColor);
+
+			if (updEv == RESULT_SUCCESS)
+				m_stateProperties[state].Set("update event", updateEvent);
+
+			if (renEv == RESULT_SUCCESS)
+				m_stateProperties[state].Set("render event", renderEvent);
+
+			if (enEv == RESULT_SUCCESS)
+				m_stateProperties[state].Set("enter event", enterEvent);
+
+			if (exEv == RESULT_SUCCESS)
+				m_stateProperties[state].Set("exit event", exitEvent);
+
+			if (dur == RESULT_SUCCESS)
+				m_stateProperties[state].Set("duration", duration);
 }

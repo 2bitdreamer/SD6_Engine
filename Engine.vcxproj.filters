@@ -209,6 +209,27 @@
     <ClCompile Include="WidgetStyle.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="KeyFrameAnimationBase.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckBoxWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="LabelWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBarWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="SliderWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollbarWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="EditLineWidget.cpp">
+      <Filter>Utilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\EulerAngles.hpp">
@@ -402,6 +423,27 @@
       <Filter>Utilities</Filter>
     </ClInclude>
     <ClInclude Include="WidgetStyle.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyFrameAnimationBase.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="LabelWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckBoxWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBarWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="SliderWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollbarWidget.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="EditLineWidget.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
   </ItemGroup>

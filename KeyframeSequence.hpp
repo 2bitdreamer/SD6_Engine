@@ -45,7 +45,8 @@ public:
 		const T& lastValue = lastKF.m_valueAtParameter;
 
 		if (m_wrapBehavior == B_CLAMP) {
-			if (parameter > lastParam)
+			
+			if ((parameter * lastParam) >= lastParam)
 				return lastValue;
 
 			parameter = Clamp(parameter, 0.f, lastParam);
@@ -60,7 +61,7 @@ public:
 			}
 
 
-			if (parameter > lastParam)
+			if ((parameter * lastParam) >= lastParam)
 				return lastValue;
 
 // 			if (parameter > lastParam)

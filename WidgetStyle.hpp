@@ -52,6 +52,7 @@ public:
 	bool Applies(const std::string& widgetName) const;
 
 	~WidgetStyle();
+
 	std::map<State, NamedProperties>& GetProperties() { return m_properties; }
 	// ...
 
@@ -63,7 +64,13 @@ private:
 	*/
 	std::map<State, NamedProperties> m_properties;
 
+	KeyFrameAnimation<RGBA> SetupColorAnimation(const TiXmlElement* colorElement);
+	KeyFrameAnimation<float> SetupFloatAnimation(const TiXmlElement* colorElement);
+	KeyFrameAnimation<Vec2> SetupVec2Animation(const TiXmlElement* vec2Element);
+	void ParseFloatAnimation(KeyFrameAnimation<float>& floatSeq, const TiXmlNode* animationDefinition);
 	void ParseColorAnimation(KeyFrameAnimation<RGBA>& colorSeq, const TiXmlNode* animationDefinition);
-
+	void ParseVec2Animation(KeyFrameAnimation<Vec2>& vec2Seq, const TiXmlNode* animationDefinition);
+public:
+	void MergeStyle(WidgetStyle* tempStyle);
 };
 

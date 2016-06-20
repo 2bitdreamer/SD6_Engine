@@ -1,7 +1,7 @@
 #include "GroupWidget.hpp"
 #include "UISystem.hpp"
 
-GroupWidget::GroupWidget()
+GroupWidget::GroupWidget() : WidgetBase()
 {
 }
 
@@ -13,22 +13,30 @@ GroupWidget::~GroupWidget()
 void GroupWidget::Update(double deltaTimeSeconds)
 {
 	for (auto& wb : m_children) {
-		wb->Update(deltaTimeSeconds);
+		if (wb->m_currentState != UI_STATE_HIDDEN) {
+			wb->Update(deltaTimeSeconds);
+		}
 	}
 }
 
 void GroupWidget::Render()
 {
 	for (auto& wb : m_children) {
-		wb->Render();
+		if (wb->m_currentState != UI_STATE_HIDDEN) {
+			wb->Render();
+		}
 	}
 }
 
-void GroupWidget::OnMouseFocusEvent(MouseEvent me) {
+void GroupWidget::OnMouseEvent(MouseEvent me) {
 	//Has click-through problem
 
-	Vec2 convertedMouseCoord = Vec2(me.m_cursorPos.x(), SCREEN_HEIGHT - me.m_cursorPos.y());
+	Vec2 convertedMouseCoord = Vec2(me.m_cursorPos.x(), me.m_cursorPos.y());
 	for (auto& wb : m_children) {
+		 
+		if (wb->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
+			continue;
+
 		Vec2 size;
 		Vec2 wp = wb->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
 
@@ -37,6 +45,13 @@ void GroupWidget::OnMouseFocusEvent(MouseEvent me) {
 		Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
 
 		if (wp.x() <= convertedMouseCoord.x() && wp.y() <= convertedMouseCoord.y() && convertedMouseCoord.x() <= maxBounds.x() && convertedMouseCoord.y() <= maxBounds.y()) {
+
+			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) {
+				std::string eventToFire;
+				wb->GetPropertyForCurrentState("pressed event", eventToFire);
+				FireEvent(eventToFire);
+			}
+
 			wb->OnMouseFocusEvent(me);
 		}
 		else if (wb->m_currentState != UI_STATE_DEFAULT) {
@@ -44,6 +59,20 @@ void GroupWidget::OnMouseFocusEvent(MouseEvent me) {
 		}
 	}
 }
+
+
+
+void GroupWidget::OnKeyBoardEvent(unsigned char theKey)
+{
+	for (auto& wb : m_children) {
+
+		if (wb->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
+			continue;
+
+		wb->OnKeyBoardEvent(theKey);
+	}
+}
+
 
 WidgetBase* GroupWidget::Create(const TiXmlNode* data)
 {
@@ -57,5 +86,25 @@ WidgetBase* GroupWidget::Create(const TiXmlNode* data)
 		}
 	}
 
+	gw->ParseAndAddEvents(data);
 	return gw;
 }
+
+void GroupWidget::DestroyWidget(WidgetBase* wb)
+{
+	for (auto it = m_children.begin(); it != m_children.end(); ) {
+		WidgetBase* child = *it;
+		GroupWidget* asGW = dynamic_cast<GroupWidget*>(child);
+		if (child == wb) {
+			it = m_children.erase(it);
+			return;
+		}
+		else if (asGW) {
+			asGW->DestroyWidget(wb);
+		}
+		else {
+			++it;
+		}
+	}
+}
+

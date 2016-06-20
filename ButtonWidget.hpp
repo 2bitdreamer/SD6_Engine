@@ -1,10 +1,10 @@
 #pragma once
-#include "WidgetBase.hpp"
+#include "LabelWidget.hpp"
 class XMLFontRenderer;
 class TiXmlNode;
 
 class ButtonWidget :
-	public WidgetBase
+	public LabelWidget
 {
 public:
 	ButtonWidget();
@@ -13,10 +13,9 @@ public:
 	static WidgetBase* Create(const TiXmlNode* data);
 	virtual void OnMouseFocusEvent(MouseEvent me);
 	virtual void OnMouseUnfocusEvent(MouseEvent me);
-	virtual void Update(double deltaTimeSeconds);
-	float GetTextOpacity();
-	Vec2 GetTextLowerLeft(const std::string& text, float cellSize);
 	virtual void Render();
+	float GetTextOpacity();
+	virtual Vec2 GetTextLowerLeft(const std::string& text, float cellSize);
 
 public:
 	XMLFontRenderer* m_fontRenderer;

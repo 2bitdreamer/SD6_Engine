@@ -190,6 +190,11 @@ std::vector<std::string> SplitString(const std::string& input, const std::string
 	size_t start = 0;
 	size_t end = 0;
 
+	if (input.find(delimiter) == std::string::npos) {
+		output.push_back(input);
+		return output;
+	}
+
 	while (start != std::string::npos && end != std::string::npos)
 	{
 		start = input.find_first_not_of(delimiter, end);

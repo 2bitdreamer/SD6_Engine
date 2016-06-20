@@ -10,12 +10,13 @@ public:
 	
 	virtual void Update(double deltaTimeSeconds);
 	virtual void Render();
-	virtual void OnMouseFocusEvent(MouseEvent me);
+	virtual void OnMouseEvent(MouseEvent me);
 
 	static WidgetBase* Create(const TiXmlNode* data);
 
 public:
 	std::vector<WidgetBase*> m_children;
-
+	void DestroyWidget(WidgetBase* wb);
+	void OnKeyBoardEvent(unsigned char theKey);
 };
 
