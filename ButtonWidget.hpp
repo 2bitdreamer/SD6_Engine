@@ -3,8 +3,7 @@
 class XMLFontRenderer;
 class TiXmlNode;
 
-class ButtonWidget :
-	public LabelWidget
+class ButtonWidget : public LabelWidget	
 {
 public:
 	ButtonWidget();
@@ -14,7 +13,6 @@ public:
 	virtual void OnMouseFocusEvent(MouseEvent me);
 	virtual void OnMouseUnfocusEvent(MouseEvent me);
 	virtual void Render();
-	float GetTextOpacity();
 	virtual Vec2 GetTextLowerLeft(const std::string& text, float cellSize);
 
 public:

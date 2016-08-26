@@ -539,7 +539,7 @@ void WidgetStyle::MergeStyle(WidgetStyle* tempStyle)
 
 	for (auto& it : newMap)
 	{
-		State curState = it.first;
+		State curState = it.first; // #Eiserloh: It is customary to get map's first as const reference
 		NamedProperties& curNPNew = it.second;
 
 		PropertyGetResult ofr = curNPNew.Get("offset", offset);

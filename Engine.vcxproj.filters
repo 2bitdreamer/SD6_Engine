@@ -230,6 +230,9 @@
     <ClCompile Include="EditLineWidget.cpp">
       <Filter>Utilities</Filter>
     </ClCompile>
+    <ClCompile Include="SpinnerWidget.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Math\EulerAngles.hpp">
@@ -446,5 +449,6 @@
     <ClInclude Include="EditLineWidget.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
+    <ClInclude Include="SpinnerWidget.hpp" />
   </ItemGroup>
 </Project>

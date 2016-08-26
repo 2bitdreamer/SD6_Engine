@@ -31,7 +31,7 @@ ScrollbarWidget::ScrollbarWidget()
 
 std::string ScrollbarWidget::GetNextDecrementID() {
 	std::stringstream ssid;
-	ssid << "Decrement" << s_id;
+	ssid << "ScrollbarDecrement" << s_id;
 	++s_id;
 	return ssid.str();
 }
@@ -40,7 +40,7 @@ std::string ScrollbarWidget::GetNextDecrementID() {
 std::string ScrollbarWidget::GetNextIncrementID()
 {
 	std::stringstream ssid;
-	ssid << "Increment" << s_id;
+	ssid << "ScrollbarIncrement" << s_id;
 	return ssid.str();
 }
 
@@ -108,17 +108,17 @@ void ScrollbarWidget::Render()
 
 void ScrollbarWidget::Update(double deltaTimeSeconds)
 {
-	RGBA color;
-	RGBA borderColor;
-	RGBA buttonTextColor;
-	Vec2 size;
-	float borderSize;
-	bool isHorizontal;
-
-	Vec2 worldPos;// = GetWorldPosition()
-	GetPropertyForCurrentState("offset", worldPos);
 
 	if (m_firstUpdate) {
+		RGBA color;
+		RGBA borderColor;
+		RGBA buttonTextColor;
+		Vec2 size;
+		float borderSize;
+		bool isHorizontal;
+
+		Vec2 worldPos;// = GetWorldPosition()
+		GetPropertyForCurrentState("offset", worldPos);
 
 		std::string incrementEvent;
 		m_incButton->GetPropertyForCurrentState("pressed event", incrementEvent);
@@ -145,7 +145,6 @@ void ScrollbarWidget::Update(double deltaTimeSeconds)
 		m_decButton->SetStaticPropertyForState("color", UI_STATE_ALL, color);
 		m_decButton->SetStaticPropertyForState("border color", UI_STATE_ALL, borderColor);
 		m_decButton->SetStaticPropertyForState("text color", UI_STATE_ALL, buttonTextColor);
-		m_decButton->SetStaticPropertyForState("size", UI_STATE_ALL, (size * m_buttonSize));
 		m_decButton->SetStaticPropertyForState("border size", UI_STATE_ALL, borderSize);
 		m_decButton->SetStaticPropertyForState("text scale", UI_STATE_ALL, textSize);
 

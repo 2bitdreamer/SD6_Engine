@@ -12,6 +12,8 @@ ButtonWidget::ButtonWidget()
 	AddPropertyForState("text scale", UI_STATE_ALL, 10.f);
 	AddPropertyForState("text color", UI_STATE_ALL, RGBA(10, 10, 10, 255));
 	AddPropertyForState("text opacity", UI_STATE_ALL, 1.f);
+	// #Eiserloh: ButtonWidget doesn't have code-defaults for HIGHLIGHTED, PRESSED, etc?
+	// #Eiserloh: Does that mean that code-default buttons would appear non-interactive?
 }
 
 

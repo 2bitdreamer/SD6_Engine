@@ -132,10 +132,10 @@ void WidgetBase::ProcessUpdateEvent() {
 }
 
 void WidgetBase::ProcessRenderEvent() {
-	std::vector<std::string> renderEvent;
-	GetPropertyForCurrentState("render event", renderEvent);
-	if (!renderEvent.empty()) {
-		for (auto it = renderEvent.begin(); it != renderEvent.end(); ++it) {
+	std::vector<std::string> renderEvents;
+	GetPropertyForCurrentState("render event", renderEvents);
+	if (!renderEvents.empty()) {
+		for (auto it = renderEvents.begin(); it != renderEvents.end(); ++it) {
 			FireEvent(*it);
 		}		
 	}
@@ -253,7 +253,7 @@ void WidgetBase::ApplyStyle(WidgetStyle* baseStyle)
 	}
 }
 
-void WidgetBase::OnKeyBoardEvent(unsigned char theKey)
+void WidgetBase::OnKeyboardEvent(unsigned char theKey)
 {
 	(void)theKey;
 }

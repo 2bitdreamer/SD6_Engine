@@ -34,42 +34,42 @@ void GroupWidget::OnMouseEvent(MouseEvent me) {
 		return;
 
 	Vec2 mouseCoord = me.m_cursorPos;
-	for (auto& wb : m_children) {
+	for (auto& childWidget : m_children) { 
 
-		if (wb->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
+		if (childWidget->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
 			continue;
 
-		GroupWidget* asGW = dynamic_cast<GroupWidget*>(wb);
+		GroupWidget* asGW = dynamic_cast<GroupWidget*>(childWidget);
 		if (asGW) {
 			asGW->OnMouseEvent(me);
 		}
 		else {
 			Vec2 size;
-			Vec2 wp = wb->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
+			Vec2 childPos = childWidget->GetWorldPosition(); //A future optimization: Subtract local offset of this from the mouse event when recursing down to the next level. Reduces n^2 to n
 
-			wb->GetPropertyForCurrentState("size", size);
+			childWidget->GetPropertyForCurrentState("size", size);
 
-			Vec2 maxBounds = Vec2(size.x() + wp.x(), size.y() + wp.y());
+			Vec2 maxBounds = Vec2(size.x() + childPos.x(), size.y() + childPos.y());
 
-			if (wp.x() <= mouseCoord.x() && wp.y() <= mouseCoord.y() && mouseCoord.x() <= maxBounds.x() && mouseCoord.y() <= maxBounds.y()) {
+			if (childPos.x() <= mouseCoord.x() && childPos.y() <= mouseCoord.y() && mouseCoord.x() <= maxBounds.x() && mouseCoord.y() <= maxBounds.y()) {
 
 				if ((GetKeyState(VK_LBUTTON) & 0x100) != 0) {
 					std::string eventToFire;
-					wb->GetPropertyForCurrentState("pressed event", eventToFire);
+					childWidget->GetPropertyForCurrentState("pressed event", eventToFire);
 					FireEvent(eventToFire);
 				}
 
-				wb->OnMouseFocusEvent(me);
+				childWidget->OnMouseFocusEvent(me);
 			}
-			else if (wb->m_currentState != UI_STATE_DEFAULT) {
-				wb->OnMouseUnfocusEvent(me);
+			else if (childWidget->m_currentState != UI_STATE_DEFAULT) {
+				childWidget->OnMouseUnfocusEvent(me);
 			}
 		}
 	}
 }
 
 
-
+// #Eiserloh: Is this "Keyboard event" a key-down event, key-up, or WM_CHAR character event?
 void GroupWidget::OnKeyBoardEvent(unsigned char theKey)
 {
 	for (auto& wb : m_children) {
@@ -77,7 +77,10 @@ void GroupWidget::OnKeyBoardEvent(unsigned char theKey)
 		if (wb->m_currentState == UI_STATE_HIDDEN) //Don't handle mouse events for hidden widgets
 			continue;
 
-		wb->OnKeyBoardEvent(theKey);
+		if (wb->m_currentState == UI_STATE_DISABLED)
+			continue;
+
+		wb->OnKeyboardEvent(theKey);
 	}
 }
 

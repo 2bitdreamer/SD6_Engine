@@ -11,6 +11,7 @@
 #include "CheckBoxWidget.hpp"
 #include "EventSystem.hpp"
 #include "ProgressBarWidget.hpp"
+#include "SpinnerWidget.hpp"
 
 #include "ScrollbarWidget.hpp"
 #include "EditLineWidget.hpp"
@@ -40,6 +41,7 @@ void UISystem::ToggleWidgetEnabled(WidgetBase* wb)
 }
 
 namespace {
+	// #Eiserloh: What's up with the _1 variables?  Were you just testing/debugging?
 	bool _1 = UISystem::RegisterWidget("Button", &ButtonWidget::Create);
 	bool _2 = UISystem::RegisterWidget("WidgetBase", &WidgetBase::Create);
 	bool _3 = UISystem::RegisterWidget("Group", &GroupWidget::Create);
@@ -49,6 +51,7 @@ namespace {
 	bool _7 = UISystem::RegisterWidget("Slider", &SliderWidget::Create);
 	bool _8 = UISystem::RegisterWidget("ScrollBar", &ScrollbarWidget::Create);
 	bool _9 = UISystem::RegisterWidget("EditLine", &EditLineWidget::Create);
+	bool _10 = UISystem::RegisterWidget("Spinner", &SpinnerWidget::Create);
 };
 
 
@@ -265,10 +268,11 @@ void UISystem::Render() {
 	s_rootWidget->Render();
 }
 
-void UISystem::OnMouseEvent(MouseEvent me) {
+void UISystem::OnMouseEvent(const MouseEvent& me) {
 	s_rootWidget->OnMouseEvent(me);
 }
 
+// #Eiserloh: Try to be consistent in naming and capitalization, e.g. Keyboard vs. KeyBoard
 void UISystem::OnKeyboardEvent(unsigned char theKey) {
 	s_rootWidget->OnKeyBoardEvent(theKey);
 }

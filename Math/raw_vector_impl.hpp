@@ -10,7 +10,6 @@
 
 namespace math { namespace vector {
 	namespace detail {
-		
 			template<size_t D, typename T>
 			T& _raw_vector<D,T>::operator[](size_t index)
 			{
@@ -35,6 +34,7 @@ namespace math { namespace vector {
 				return m_data[index];
 			}
 
+			// #Eiserloh: Ack!  All of these should-be-superfast math functions are crazy slow!
 			template<size_t D, typename T>
 			raw_vector<D, T>& _raw_vector<D,T>::operator+=(const raw_vector<D, T>& other)
 			{
@@ -216,6 +216,8 @@ namespace math { namespace vector {
 			template<size_t D, typename T>
 			T _raw_vector<D,T>::DistanceSquared(const raw_vector<D, T>& other) const
 			{
+				// #Eiserloh: This Vector class template is much SLOWER, and far more confusing, than simple Vec2,Vec3,Vec4 classes... and they should have quite different interfaces (lots of functions that exist only on one or the other)
+				// #Eiserloh: DistanceSquared should be a trivial math function; instead, you have temporary variables and looping and comparison going on...
 				T distanceSquared = (T)0;
 				for(int index = 0; index < D; index++)
 				{

@@ -20,7 +20,7 @@ public:
 };
 
 template <typename T>
-class KeyframeSequence
+class KeyframeSequence // #Eiserloh: Be case-consistent, e.g. "Keyframe" vs. "KeyFrame"
 {
 
 public:

@@ -15,16 +15,16 @@ public:
 
 	virtual void OnMouseFocusEvent(MouseEvent me);
 	virtual void OnMouseUnfocusEvent(MouseEvent me);
-	virtual void OnKeyBoardEvent(unsigned char theKey);
+	virtual void OnKeyboardEvent(unsigned char theKey);
 
 	static WidgetBase* Create(const TiXmlNode* data);
 
 protected:
-	int m_cursorIndex;
+	size_t m_cursorIndex;
 	std::string m_fullText;
 	bool m_firstUpdate;
-	int m_leftmostCharacterIndex;
-	int m_rightmostCharacterIndex;
+	size_t m_leftmostCharacterIndex;
+	size_t m_rightmostCharacterIndex;
 	float m_largeCharSize;
 	double m_currentBlinkTimeSeconds;
 	bool m_canType;

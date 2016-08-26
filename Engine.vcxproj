@@ -230,6 +230,7 @@
     <ClCompile Include="Memory.cpp" />
     <ClCompile Include="SliderWidget.cpp" />
     <ClCompile Include="SocketThread.cpp" />
+    <ClCompile Include="SpinnerWidget.cpp" />
     <ClCompile Include="TestMemory.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
@@ -302,6 +303,7 @@
     <ClInclude Include="SignpostAllocator.hpp" />
     <ClInclude Include="SliderWidget.hpp" />
     <ClInclude Include="SocketThread.hpp" />
+    <ClInclude Include="SpinnerWidget.hpp" />
     <ClInclude Include="TestMemory.hpp" />
     <ClInclude Include="Thread.hpp" />
     <ClInclude Include="TriangleMesh.hpp" />

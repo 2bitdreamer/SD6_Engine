@@ -13,7 +13,8 @@ EditLineWidget::EditLineWidget()
 	m_rightmostCharacterIndex(0),
 	m_currentBlinkTimeSeconds(0.0),
 	m_largeCharSize(0.0f),
-	m_canType(false)
+	m_canType(false),
+	m_firstUpdate(true)
 {
 	SetStaticPropertyForState("text", UI_STATE_ALL, std::string(""));
 	SetStaticPropertyForState("size", UI_STATE_ALL, Vec2(500.f, 50.f));
@@ -45,7 +46,7 @@ void EditLineWidget::Render()
 
 	RGBA cursorColor;
 	GetPropertyForCurrentState("text color", cursorColor);
-	cursorColor.a() *= textOpacity;
+	cursorColor.a() = static_cast<unsigned char>(cursorColor.a() * textOpacity);
 
 	float textScale;
 	GetPropertyForCurrentState("text scale", textScale);
@@ -89,6 +90,8 @@ void EditLineWidget::Update(double deltaTimeSeconds)
 			m_rightmostCharacterIndex - m_leftmostCharacterIndex + 1);
 		SetStaticPropertyForState("text", UI_STATE_ALL, curText);
 	}
+	else
+		SetStaticPropertyForState("text", UI_STATE_ALL, std::string(""));
 	LabelWidget::Update(deltaTimeSeconds);
 	
 	if (m_canType)
@@ -147,7 +150,7 @@ void EditLineWidget::OnMouseUnfocusEvent(MouseEvent me)
 	LabelWidget::OnMouseUnfocusEvent(me);
 }
 
-void EditLineWidget::OnKeyBoardEvent(unsigned char theKey)
+void EditLineWidget::OnKeyboardEvent(unsigned char theKey)
 {
 	if (m_canType)
 	{
@@ -168,7 +171,6 @@ void EditLineWidget::OnKeyBoardEvent(unsigned char theKey)
 
 		float textBoundary = size.x() - m_largeCharSize;
 		float textScreenSize = m_fontRenderer->CalcTextWidth(m_fullText, textScale * 5.f);
-
 
 		if (game.m_keyStates[VK_LEFT].m_isPressed)
 		{
@@ -200,23 +202,18 @@ void EditLineWidget::OnKeyBoardEvent(unsigned char theKey)
 			if (m_cursorIndex != 0)
 			{
 				m_cursorIndex--;
-				if (m_fullText.size() <= 1)
-				{
-					m_fullText = std::string("");
-					m_leftmostCharacterIndex = 0;
-					m_rightmostCharacterIndex = 0;
-				}
-
-				else
-				{
-					m_fullText.erase(m_fullText.begin() + m_cursorIndex);
-					aStr = m_fullText;
-					if ((textScreenSize > textBoundary && (m_leftmostCharacterIndex > 0)))
-						m_leftmostCharacterIndex--;
-					//m_rightmostCharacterIndex++;
-					m_rightmostCharacterIndex--;
-				}
+				
+				m_fullText.erase(m_fullText.begin() + m_cursorIndex);
+				aStr = m_fullText;
+				if ((textScreenSize > textBoundary && (m_leftmostCharacterIndex > 0)))
+					m_leftmostCharacterIndex--;
+				//m_rightmostCharacterIndex++;
+				m_rightmostCharacterIndex--;
 			}
+		}
+		else if (theKey == '\b')
+		{
+			return;
 		}
 		else
 		{
@@ -250,6 +247,7 @@ void EditLineWidget::OnKeyBoardEvent(unsigned char theKey)
 			m_fullText = aStr;
 		}
 	}
+	
 }
 
 WidgetBase* EditLineWidget::Create(const TiXmlNode* data)

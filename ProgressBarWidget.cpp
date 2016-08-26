@@ -9,7 +9,7 @@ ProgressBarWidget::ProgressBarWidget() : WidgetBase()
 {
 	float codeDefaultDuration = 7.f;
 	AddPropertyForState("inner color", UI_STATE_ALL, RGBA(50, 50, 255, 255));
-	AddPropertyForState("direction", UI_STATE_ALL, C_DIRECTION_EAST);
+	AddPropertyForState("direction", UI_STATE_ALL, C_DIRECTION_NORTH);
 	AddPropertyForState("duration", UI_STATE_ALL, codeDefaultDuration);
 
 	AddPropertyForState("progress", UI_STATE_ALL, 0.f, 0.f);

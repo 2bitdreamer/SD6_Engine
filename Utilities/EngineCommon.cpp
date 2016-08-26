@@ -653,7 +653,7 @@ void FireEventForEachFileFound(const std::string& eventToFire, const std::string
 	std::vector<std::string> foundFilesOut;
 	EnumerateFiles(baseFolder, filePattern, foundFilesOut, recurseSubfolders);
 
-	for (std::string file : foundFilesOut) {
+	for (std::string file : foundFilesOut) { // #Eiserloh: Careful when you use this syntax; here you create duplicate strings (heap allocs) by value for each item.  Did you intend to?
 		NamedProperties fileEvent;
 		std::vector<std::string> splitAtDot = SplitString(file, ".");
 		std::vector<std::string> splitAtFwdSlash = SplitString(file, "/");

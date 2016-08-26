@@ -9,7 +9,7 @@ namespace math { namespace vector {
   template<size_t D, typename T>
   class raw_vector;
 } }
-
+// #Eiserloh: Why the namespace "vector" within "math"?  You control these custom namespaces, so the "avoid naming conflicts" argument vs. third-party codes doesn't apply WITHIN the "math" namespace.  You can do this, but it's just one extra thing to slow down the reader.
 typedef math::vector::raw_vector<2, int> Vec2i;
 typedef math::vector::raw_vector<3, int> Vec3i;
 typedef math::vector::raw_vector<3, int> Vec4i;
@@ -75,7 +75,7 @@ namespace math { namespace vector {
       _raw_vector(const _raw_vector<D2, T>& that);
       
     private:
-      T m_data[D];
+      T m_data[D]; // #Eiserloh: Debug builds will be MUCH slower because of these being private (industry common practice is to make x,y,z public)
 	  raw_vector<D, T> const& downcast() const  { return static_cast<raw_vector<D, T> const&>(*this); }
 	  raw_vector<D, T> & downcast() { return static_cast<raw_vector<D, T>&>(*this); }
     };

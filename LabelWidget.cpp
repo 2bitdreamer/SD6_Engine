@@ -74,9 +74,6 @@ void LabelWidget::Render()
 	//renderPos.z() = -100.f;
 	m_fontRenderer->DrawString(textToDraw, renderColor, renderPos, cellSize);
 
-	std::vector<std::string> renderEvent;
-	GetPropertyForCurrentState("render event", renderEvent);
-
 	ProcessRenderEvent();
 }
 

@@ -7,6 +7,13 @@ template <typename T>
 class KeyFrameAnimation : public KeyFrameAnimationBase
 {
 public:
+	// #Eiserloh: I really really want to just see a clean, compact list of the class's
+	// #Eiserloh:	capabilities.  However, since you keep putting lots of code INSIDE the
+	// #Eiserloh:	class definition like this, I have to scroll down to try to get an idea
+	// #Eiserloh:	of capabilities and usage.
+	//
+	// #Eiserloh: Other than perhaps trivial same-liners e.g. float GetQ() const { return m_q; }
+	// #Eiserloh:	you should put implementations AFTER the class in .HPP, or in .impl file, or in .CPP.
 	KeyFrameAnimation(const KeyframeSequence<T>& keyFrames, float duration)  :
 		m_durationSeconds(duration),
 		m_currentSeconds(0.f),

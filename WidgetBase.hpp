@@ -18,7 +18,7 @@ public:
 	virtual void ApplyWidgetProperties(const NamedProperties& widgetDescriptor);
 	virtual void OnMouseFocusEvent(MouseEvent me);
 	virtual void OnMouseUnfocusEvent(MouseEvent me);
-	virtual void OnKeyBoardEvent(unsigned char theKey);
+	virtual void OnKeyboardEvent(unsigned char theKey);
 
 
 	Vec2 GetWorldPosition();
@@ -49,6 +49,10 @@ public:
 		return resultAnim;
 	}
 
+	// #Eiserloh: Don't implement code in the middle of a class!
+	// #Eiserloh: It completely destroys and undermines the purpose of the class definition,
+	// #Eiserloh:  i.e. to afford the reader a clear, succinct summary of usage!
+	// #Eiserloh: Implementations below (outside the class {}), on in .CPP, or in an .impl file.
 	template <typename T>
 	void UpdateProperty(const std::string& name, float deltaTimeSeconds) {
 		// 		KeyFrameAnimation<T> asKFA;
