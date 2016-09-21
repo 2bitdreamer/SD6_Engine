@@ -15,6 +15,8 @@
 class ShaderProgram;
 class Camera3D;
 
+extern PFNGLGETACTIVEATTRIBPROC glGetActiveAttrib;
+extern PFNGLPATCHPARAMETERIPROC glPatchParameteri;
 extern PFNGLGENBUFFERSPROC		glGenBuffers;
 extern PFNGLBINDBUFFERPROC		glBindBuffer;
 extern PFNGLBUFFERDATAPROC		glBufferData;		
@@ -50,6 +52,8 @@ extern PFNGLUNIFORM4FPROC glUniform4f;
 extern PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
 extern PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 extern PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+extern PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
+extern PFNGLBINDVERTEXARRAYPROC glBindVertexArray;
 
 
 #define WGL_CURRENT_BIT                    0x00000001
@@ -144,8 +148,9 @@ public:
 	void PopMatrix();
 	void PushMatrix();
 
-	void RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath = "");
-	void RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath = "");
+	void RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath = "", const std::string& spn = "");
+	void RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath = "", const std::string& spn = "");
+	void CreateIcosahedron();
 	void RotateMatrix(float angle, float x, float y, float z);
 	void RotateMatrix(float angle, const Vec3& axis);
 

@@ -21,7 +21,8 @@
 #include <limits>
 #include "../Assert.hpp"
 #include "../EventSystem.hpp"
-
+#include <iostream>
+#include <fstream>
 
 bool g_isQuitting = false;
 
@@ -65,6 +66,18 @@ bool IsLittleEndian() {
 
 float RandomAngle() {
 	return RandomFloat(0.f,360.f);
+}
+
+bool FileExists(const std::string& name) {
+	std::ifstream f(name.c_str());
+	if (f.good()) {
+		f.close();
+		return true;
+	}
+	else {
+		f.close();
+		return false;
+	}
 }
 
 Vec3 Vec2iToVec3(const Vec2i& inVec2i) {
@@ -807,17 +820,6 @@ void StringReplaceAll(std::string& str, const std::string& from, const std::stri
 		str.replace(start_pos, from.length(), to);
 		start_pos += to.length();
 	}
-}
-
-inline bool FileExists (const std::string& name) {
-	std::ifstream f(name.c_str());
-	if (f.good()) {
-		f.close();
-		return true;
-	} else {
-		f.close();
-		return false;
-	}   
 }
 
 

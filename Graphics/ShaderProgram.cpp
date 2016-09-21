@@ -40,6 +40,16 @@ std::string ShaderProgram::GetVertexShaderPath(const std::string& shaderName) {
 
 
 
+std::string ShaderProgram::GetTesselationControlShaderPath(const std::string& shaderName)
+{
+	return Stringf("Data/Shaders/%s.tessctrl.glsl", shaderName.c_str());
+}
+
+std::string ShaderProgram::GetTesselationEvaluationShaderPath(const std::string& shaderName)
+{
+	return Stringf("Data/Shaders/%s.tesseval.glsl", shaderName.c_str());
+}
+
 ShaderProgram* ShaderProgram::GetShaderProgramByName(const std::string& shaderProgramName) {
 	ShaderProgram* returnShaderProgram = nullptr;
 	if (s_shaderProgramRegistry.find(shaderProgramName) != s_shaderProgramRegistry.end())
@@ -51,7 +61,7 @@ ShaderProgram* ShaderProgram::GetShaderProgramByName(const std::string& shaderPr
 
 ShaderProgram* ShaderProgram::CreateOrGetShaderProgram(const std::string& shaderName) {
 	ShaderProgram* returnShaderProgram = GetShaderProgramByName(shaderName);
-	if (returnShaderProgram == nullptr) {
+	if (returnShaderProgram == nullptr && shaderName != "") {
 		returnShaderProgram = new ShaderProgram(shaderName);
 		s_shaderProgramRegistry[shaderName] = returnShaderProgram;
 	}
@@ -59,18 +69,33 @@ ShaderProgram* ShaderProgram::CreateOrGetShaderProgram(const std::string& shader
 }
 
 
-#pragma message("Make constructor build Shaders itself from std::string") 
 ShaderProgram::ShaderProgram(const std::string& shaderName) {
 
 	Shader vertexShader = Shader(GL_VERTEX_SHADER, GetVertexShaderPath(shaderName));
-	Shader fragmentShader = Shader(GL_FRAGMENT_SHADER, GetFragmentShaderPath(shaderName));
 
+	
 	// Create a new shader program ID
 	m_programID = glCreateProgram();
 	int wasSuccessful;
 
 	// Attach the vertex and fragment shaders to the new shader program
 	glAttachShader(m_programID, vertexShader.GetShaderID());
+
+
+	std::string tessEvalPath = GetTesselationEvaluationShaderPath(shaderName);
+	std::string tessCtrlPath = GetTesselationControlShaderPath(shaderName);
+
+	if (FileExists(tessCtrlPath)) {
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+		Shader tessCtrl = Shader(GL_TESS_CONTROL_SHADER, tessCtrlPath);
+		Shader tessEval = Shader(GL_TESS_EVALUATION_SHADER, tessEvalPath);
+
+		glAttachShader(m_programID, tessCtrl.GetShaderID());
+		glAttachShader(m_programID, tessEval.GetShaderID());
+	}
+
+	Shader fragmentShader = Shader(GL_FRAGMENT_SHADER, GetFragmentShaderPath(shaderName));
 	glAttachShader(m_programID, fragmentShader.GetShaderID());
 
 	//  Do some other advanced stuff we'll do later on (like setting generic vertex attrib locations)
@@ -88,6 +113,17 @@ ShaderProgram::ShaderProgram(const std::string& shaderName) {
 	if (wasSuccessful != GL_TRUE) {
 		vertexShader.PrintLog(m_programID, vertexShader.GetShaderFilePath(), fragmentShader.GetShaderFilePath());
 		exit(1); // COMMENT: exit() should never be called outside of main, throw an exception instead
+	}
+
+	GLint numActiveAttribs = 0;
+	GLenum type;
+	GLchar name[128];
+	GLint size;
+	GLsizei length;
+
+	glGetProgramiv(m_programID, GL_ACTIVE_ATTRIBUTES, &numActiveAttribs);
+	for (int i = 0; i < numActiveAttribs; i++) {
+		glGetActiveAttrib(m_programID, i, 128, &length, &size, &type, name);
 	}
 }
 

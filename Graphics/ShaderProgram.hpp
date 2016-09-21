@@ -14,6 +14,8 @@ public:
 	static ShaderProgram* CreateOrGetShaderProgram(const std::string& shaderName);
 	std::string GetFragmentShaderPath(const std::string& shaderName);
 	std::string GetVertexShaderPath(const std::string& shaderName);
+	std::string GetTesselationControlShaderPath(const std::string& shaderName);
+	std::string GetTesselationEvaluationShaderPath(const std::string& shaderName);
 	static ShaderProgram* GetShaderProgramByName(const std::string& shaderProgramName);
 	static std::map< std::string, ShaderProgram* > s_shaderProgramRegistry;
 private:

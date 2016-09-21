@@ -358,6 +358,7 @@ bool StringEndsWith(const std::string& value, const std::string& ending);
 bool StringBeginsWith(const std::string& value, const std::string& beginning);
 bool StringReplace(std::string& str, const std::string& from, const std::string& to);
 void StringReplaceAll(std::string& str, const std::string& from, const std::string& to);
+bool FileExists(const std::string& name);
 bool DoesRectOverlapRect(const Vec2& rectOnePos, const Vec2& rectOneSize, const Vec2& rectTwoPos, const Vec2& rectTwoSize);
 
 template<typename T, typename U> U select2nd_f(const std::pair<T, U>& p) { return p.second; }

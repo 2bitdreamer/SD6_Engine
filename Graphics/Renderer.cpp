@@ -59,6 +59,10 @@ PFNGLUNIFORM4FPROC glUniform4f = nullptr;
 PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers = nullptr;
 PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer = nullptr;
 PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D = nullptr;
+PFNGLPATCHPARAMETERIPROC glPatchParameteri = nullptr;
+PFNGLGETACTIVEATTRIBPROC glGetActiveAttrib = nullptr;
+PFNGLGENVERTEXARRAYSPROC glGenVertexArrays = nullptr;
+PFNGLBINDVERTEXARRAYPROC glBindVertexArray = nullptr;
 
 
 void Renderer::SetIdentity() {
@@ -113,8 +117,8 @@ void Renderer::PushMatrix()
 	m_matrixStack.push_back(m_matrixStack.back());
 }
 
-void Renderer::RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath /*= ""*/) {
-	Material testMat;
+void Renderer::RenderPrimitives(int primitiveType, const Vertex* vertexData, size_t numVertices, const std::string& texturePath /*= ""*/, const std::string& shaderProgName) {
+	Material testMat(shaderProgName);
 	testMat.AddTexture(texturePath, "u_diffuseMap");
 	int shaderID = testMat.GetShaderProgramID();
 	glUseProgram(shaderID);
@@ -150,8 +154,76 @@ void Renderer::RenderPrimitives(int primitiveType, const Vertex* vertexData, siz
 	glDisableVertexAttribArray(texCoordsLocation);
 }
 
-void Renderer::RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath /*= ""*/) {
-	RenderPrimitives(primitiveType, &vertexData[0], vertexData.size(), texturePath);
+void Renderer::CreateIcosahedron()
+{
+	const int Faces[] = {
+		2, 1, 0,
+		3, 2, 0,
+		4, 3, 0,
+		5, 4, 0,
+		1, 5, 0,
+
+		11, 6,  7,
+		11, 7,  8,
+		11, 8,  9,
+		11, 9,  10,
+		11, 10, 6,
+
+		1, 2, 6,
+		2, 3, 7,
+		3, 4, 8,
+		4, 5, 9,
+		5, 1, 10,
+
+		2,  7, 6,
+		3,  8, 7,
+		4,  9, 8,
+		5, 10, 9,
+		1, 6, 10 };
+
+	const float Verts[] = {
+		0.000f,  0.000f,  1.000f,
+		0.894f,  0.000f,  0.447f,
+		0.276f,  0.851f,  0.447f,
+		-0.724f,  0.526f,  0.447f,
+		-0.724f, -0.526f,  0.447f,
+		0.276f, -0.851f,  0.447f,
+		0.724f,  0.526f, -0.447f,
+		-0.276f,  0.851f, -0.447f,
+		-0.894f,  0.000f, -0.447f,
+		-0.276f, -0.851f, -0.447f,
+		0.724f, -0.526f, -0.447f,
+		0.000f,  0.000f, -1.000f };
+
+	GLsizei IndexCount = sizeof(Faces) / sizeof(Faces[0]);
+	
+	// Create the VAO:
+	GLuint vao;
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	// Create the VBO for positions:
+	GLuint positions;
+	GLsizei stride = 3 * sizeof(float);
+	glGenBuffers(1, &positions);
+	glBindBuffer(GL_ARRAY_BUFFER, positions);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Verts), Verts, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, 0);
+
+	// Create the VBO for indices:
+	GLuint indices;
+	glGenBuffers(1, &indices);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Faces), Faces, GL_STATIC_DRAW);
+
+	glDrawElements(GL_PATCHES, IndexCount, GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+}
+
+void Renderer::RenderPrimitives(int primitiveType, const std::vector<Vertex>& vertexData, const std::string& texturePath /*= ""*/, const std::string& progName) {
+	RenderPrimitives(primitiveType, &vertexData[0], vertexData.size(), texturePath, progName);
 }
 
 void Renderer::RenderTexturedAABB(const Vec2& mins, const Vec2& maxs, int colorTextureID, int depthTextureID, int shaderID) {
@@ -379,6 +451,7 @@ void Renderer::InitializeAdvancedOpenGLFunctions()
 	glGetProgramInfoLog = (PFNGLGETPROGRAMINFOLOGPROC) wglGetProcAddress("glGetProgramInfoLog");
 	glCompileShader = (PFNGLCOMPILESHADERPROC) wglGetProcAddress("glCompileShader");
 	glGetProgramiv = (PFNGLGETPROGRAMIVPROC) wglGetProcAddress("glGetProgramiv");
+	glGetActiveAttrib = (PFNGLGETACTIVEATTRIBPROC)wglGetProcAddress("glGetActiveAttrib");
 	glVertexAttribPointer = (PFNGLVERTEXATTRIBPOINTERPROC) wglGetProcAddress("glVertexAttribPointer");
 	glGetAttribLocation = (PFNGLGETATTRIBLOCATIONPROC) wglGetProcAddress("glGetAttribLocation");
 	glVertexAttrib4f = (PFNGLVERTEXATTRIB4FPROC) wglGetProcAddress("glVertexAttrib4f");
@@ -391,6 +464,8 @@ void Renderer::InitializeAdvancedOpenGLFunctions()
 	glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC) wglGetProcAddress("glGenFramebuffers");
 	glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC) wglGetProcAddress("glBindFramebuffer");
 	glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC) wglGetProcAddress("glFramebufferTexture2D");
-
+	glPatchParameteri = (PFNGLPATCHPARAMETERIPROC) wglGetProcAddress("glPatchParameteri");
+	glGenVertexArrays = (PFNGLGENVERTEXARRAYSPROC)wglGetProcAddress("glGenVertexArrays");
+	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
 }  
 

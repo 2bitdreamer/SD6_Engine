@@ -19,7 +19,12 @@ Material::Material(void)
 
 Material::Material(const std::string& shaderProgramName)
 {
-	m_shaderProgram = ShaderProgram::CreateOrGetShaderProgram(shaderProgramName);
+	if (shaderProgramName != "") {
+		m_shaderProgram = ShaderProgram::CreateOrGetShaderProgram(shaderProgramName);
+	}
+	else {
+		m_shaderProgram = GetDefaultShaderProgram();
+	}
 }
 
 Material::~Material(void)
